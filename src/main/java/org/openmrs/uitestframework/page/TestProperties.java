@@ -30,6 +30,8 @@ public class TestProperties {
 				System.out.println("test.properties found: " + resource.toExternalForm());
 				InputStream input = resource.openStream();
 				properties.load(new InputStreamReader(input, "UTF-8"));
+				System.out.println("properties:");
+				System.out.println(properties);
 			}
 		}
 		catch (IOException ioException) {
