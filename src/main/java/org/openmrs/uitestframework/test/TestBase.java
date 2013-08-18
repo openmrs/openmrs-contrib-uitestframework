@@ -16,10 +16,12 @@ import org.apache.commons.vfs2.VFS;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 import org.openmrs.uitestframework.page.GenericPage;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
@@ -28,6 +30,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class TestBase {
@@ -69,11 +72,7 @@ public class TestBase {
     public TestRule testWatcher = new TestWatcher() {
         @Override
         public void failed(Throwable t, Description test) {
-            File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            try {
-                FileUtils.copyFile(tempFile, new File("target/screenshots/" + test.getDisplayName() + ".png"));
-            } catch (IOException e) {
-            }
+            takeScreenshot(test.getDisplayName());
         }
     };
     
@@ -122,7 +121,15 @@ public class TestBase {
                 }
         	}
         }
-        System.setProperty("webdriver.chrome.driver", chromedriverExecutablePath);
+        System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, chromedriverExecutablePath);
+        String chromedriverFilesDir = "target/chromedriverlogs";
+        try {
+	        FileUtils.forceMkdir(new File(chromedriverFilesDir));
+        }
+        catch (IOException e) {
+        	e.printStackTrace();
+        }
+        System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-" + TestClassName.name + ".log");
         driver = new ChromeDriver();
         return driver;
     }
@@ -145,5 +152,25 @@ public class TestBase {
 	public void assertPage(Page expected) {
 	    assertEquals(expected.expectedUrlPath(), currentPage().urlPath());
     }
+
+	public void takeScreenshot(String filename) {
+	    File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+	    try {
+	        FileUtils.copyFile(tempFile, new File("target/screenshots/" + filename + ".png"));
+	    } catch (IOException e) {
+	    }
+    }
+
+	// This junit cleverness picks up the name of the test class, to be used in the chromedriver log file name.
+	@ClassRule 
+	public static TestClassName TestClassName = new TestClassName();
+	static class TestClassName implements TestRule {
+		public String name;
+		@Override
+	    public Statement apply(Statement statement, Description description) {
+			name = description.getTestClass().getSimpleName();
+		    return statement;
+	    }
+	}
 
 }

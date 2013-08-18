@@ -1,0 +1,18 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+*.idea
+*.iml
+
+.vagrant
+
+/target
+/packaging/target
+
+# eclipse
+.project
+.settings
