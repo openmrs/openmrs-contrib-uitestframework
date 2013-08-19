@@ -158,7 +158,7 @@ public abstract class AbstractBasePage implements Page {
     	});
     }
 
-    void waitForJsVariable(final String varName) {
+    public void waitForJsVariable(final String varName) {
     	WebDriverWait wait = new WebDriverWait(driver, MAX_WAIT_SECONDS*3);
     	wait.until(new ExpectedCondition<Boolean>() {
     	      @Override
