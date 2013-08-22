@@ -100,9 +100,9 @@
 
 	<distributionManagement>
 	    <repository>
-	        <id>openmrs-repo-modules</id>
-	        <name>Modules</name>
-	        <url>http://mavenrepo.openmrs.org/nexus/content/repositories/modules/</url>
+	        <id>openmrs-repo-contrib</id>
+	        <name>Contrib</name>
+	        <url>http://mavenrepo.openmrs.org/nexus/content/repositories/contrib/</url>
 	    </repository>
 	    <snapshotRepository>
 	        <id>openmrs-repo-snapshots</id>
