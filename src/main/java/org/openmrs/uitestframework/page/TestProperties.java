@@ -63,12 +63,12 @@ public class TestProperties {
 	}
 	
 	String getProperty(String property, String defaultValue) {
-		String value = properties.getProperty(property);
-		if (value == null) {
-			value = System.getProperty(property);
-		}
+		String value = System.getProperty(property);
 		if (value == null) {
 			value = System.getenv(property);
+		}
+		if (value == null) {
+			value = properties.getProperty(property);
 		}
 		if (value == null) {
 			value = defaultValue;

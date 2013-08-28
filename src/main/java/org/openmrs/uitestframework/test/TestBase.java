@@ -111,8 +111,12 @@ public class TestBase {
 	                chromedriver_vfs = VFS.getManager().resolveFile(chromedriverExecutable.toExternalForm());
 	                File chromedriver_fs = new File(FileUtils.getTempDirectory(), chromedriverExecutableFilename);
 					FileObject chromedriverUnzipped = VFS.getManager().toFileObject(chromedriver_fs);
+					chromedriverUnzipped.delete();
 					chromedriverUnzipped.copyFrom(chromedriver_vfs, new AllFileSelector());
 					chromedriverExecutablePath = chromedriver_fs.getPath();
+					if (! SystemUtils.IS_OS_WINDOWS) {
+						chromedriver_fs.setExecutable(true);
+					}
                 }
                 catch (FileSystemException e) {
                 	System.err.println(errmsg + ": " + e);
