@@ -11,6 +11,8 @@ public class LoginPage extends AbstractBasePage {
 	public static final String LOGIN_PATH = "/login.htm";
     public static final String UNKOWN_LOCATION_ELEMENT_ID = "Registration Desk";
 	static final String LOGOUT_PATH = "/logout";
+	static final String CLERK_USERNAME = "clerk";
+	static final String CLERK_PASSWORD = "Clerk123";
 	
 	private String UserName;
 	
@@ -38,4 +40,8 @@ public class LoginPage extends AbstractBasePage {
 	public String expectedUrlPath() {
 		return URL_ROOT + LOGIN_PATH;
 	}
+
+	public void loginAsClerk() {
+	    login(CLERK_USERNAME, CLERK_PASSWORD);
+    }
 }
