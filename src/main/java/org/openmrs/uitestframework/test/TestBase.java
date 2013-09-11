@@ -29,10 +29,8 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.mysql.MySqlDataTypeFactory;
 import org.dbunit.ext.mysql.MySqlMetadataHandler;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -55,7 +53,7 @@ public class TestBase {
 	
 	protected static WebDriver driver;
 	
-	protected static IDatabaseTester dbTester;
+	private static IDatabaseTester dbTester;
 	
 	@BeforeClass
 	public static void startWebDriver() {
@@ -82,8 +80,14 @@ public class TestBase {
 		driver.quit();
 	}
 	
-	@BeforeClass
-	public static void initDatabaseConnection() throws Exception {
+    public static IDatabaseTester getDbTester() throws Exception {
+    	if (dbTester == null) {
+    		initDatabaseConnection();
+    	}
+    	return dbTester;
+    }
+
+	private static void initDatabaseConnection() throws Exception {
 		final TestProperties properties = TestProperties.instance();
 		dbTester = new JdbcDatabaseTester(properties.getDatabaseDriverclass(), properties.getDatabaseConnectionUrl(),
 		        properties.getDatabaseUsername(), properties.getDatabasePassword(), properties.getDatabaseSchema()) {
@@ -102,13 +106,18 @@ public class TestBase {
 		};
 	}
 	
-	@Before
+	/**
+	 * Typically invoked from an @Before method.
+	 */
 	public void dbUnitSetup() throws Exception {
-		dbTester.setDataSet(dbUnitDataset());
-		dbTester.setSetUpOperation(dbUnitSetUpOperation());
-		dbTester.onSetup();
+		getDbTester().setDataSet(dbUnitDataset());
+		getDbTester().setSetUpOperation(dbUnitSetUpOperation());
+		getDbTester().onSetup();
 	}
 	
+	/**
+	 * Override to setup a pre-test dataset.
+	 */
 	protected IDataSet dbUnitDataset() throws DataSetException {
 		// empty dataset
 		String inputXml = "<dataset></dataset>";
@@ -123,10 +132,12 @@ public class TestBase {
 	    return DatabaseOperation.REFRESH;
     }
 
-	@After
+	/**
+	 * Typically invoked from an @After method.
+	 */
 	public void dbUnitTearDown() throws Exception {
-		dbTester.setTearDownOperation(dbUnitTearDownOperation());
-		dbTester.onTearDown();
+		getDbTester().setTearDownOperation(dbUnitTearDownOperation());
+		getDbTester().onTearDown();
 	}
 	
 	/**
@@ -137,7 +148,7 @@ public class TestBase {
     }
 
 	protected QueryDataSet newQueryDataSet() throws Exception {
-	    return new QueryDataSet(dbTester.getConnection());
+	    return new QueryDataSet(getDbTester().getConnection());
     }
 
 	public static void goToLoginPage() {
@@ -269,7 +280,9 @@ public class TestBase {
      * Delete the given patient from the various tables that contain
      * portions of a patient's info. Note this does not do the actual
      * deletion, that is done via DbUnit in the tearDown method
-     * using the DatabaseOperation.DELETE operation.
+     * using the DatabaseOperation.DELETE operation, which must be
+     * "enabled" by calling dbUnitTearDown() after calling
+     * deletePatient().
      * 
      * @param id The database patient_id column.
      */
@@ -284,7 +297,7 @@ public class TestBase {
 		addSimpleQuery(dataSet, "patient_identifier", "patient_id", id);
 		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", id));
 		addSimpleQuery(dataSet, "person_attribute", "person_id", id);
-		dbTester.setDataSet(dataSet);
+		getDbTester().setDataSet(dataSet);
 	}
 	
 	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id) throws AmbiguousTableNameException {
