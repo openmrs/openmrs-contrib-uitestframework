@@ -93,8 +93,7 @@ public class TestProperties {
 		System.out.println(LOGIN_USERNAME_PROPERTY + ": " + getUserName());
 		System.out.println(LOGIN_PASSWORD_PROPERTY + ": " + getPassword());
 		System.out.println(WEBDRIVER_PROPERTY + ": " + getWebDriver());
-		System.out.println(DATABASE_USERNAME_PROPERTY + ": " + getDatabaseUsername());
-		System.out.println(DATABASE_PASSWORD_PROPERTY + ": " + getDatabasePassword());
+		System.out.println(DATABASE_CONNECTIONURL_PROPERTY + ": " + getDatabaseConnectionUrl());
 	}
 	
 	public String getWebAppUrl() {
