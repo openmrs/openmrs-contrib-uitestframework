@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.contrib</groupId>
@@ -18,8 +19,8 @@
 		<connection>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</connection>
 		<developerConnection>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</developerConnection>
 		<url>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</url>
-      <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 	<dependencies>
 		<dependency>
@@ -42,16 +43,31 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.15</version>
 		</dependency>
-	  	<dependency>
-	  		<groupId>org.dbunit</groupId>
-	  		<artifactId>dbunit</artifactId>
-	  		<version>2.4.9</version>
-	  	</dependency>
-	  	<dependency>
-	  		<groupId>mysql</groupId>
-	  		<artifactId>mysql-connector-java</artifactId>
-	  		<version>5.1.25</version>
-	  	</dependency>
+		<dependency>
+			<groupId>org.dbunit</groupId>
+			<artifactId>dbunit</artifactId>
+			<version>2.4.9</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.25</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.2.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -79,11 +95,11 @@
 						<tagNameFormat>@{project.version}</tagNameFormat>
 					</configuration>
 				</plugin>
-			<plugin>
-				<groupId>org.openmrs.maven.plugins</groupId>
-				<artifactId>maven-openmrs-plugin</artifactId>
-				<version>1.0.1</version>
-			</plugin>
+				<plugin>
+					<groupId>org.openmrs.maven.plugins</groupId>
+					<artifactId>maven-openmrs-plugin</artifactId>
+					<version>1.0.1</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -108,16 +124,16 @@
 	</pluginRepositories>
 
 	<distributionManagement>
-	    <repository>
-	        <id>openmrs-repo-contrib</id>
-	        <name>Contrib</name>
-	        <url>http://mavenrepo.openmrs.org/nexus/content/repositories/contrib/</url>
-	    </repository>
-	    <snapshotRepository>
-	        <id>openmrs-repo-snapshots</id>
-	        <name>OpenMRS Snapshots</name>
-	        <url>http://mavenrepo.openmrs.org/nexus/content/repositories/snapshots</url>
-	    </snapshotRepository>
+		<repository>
+			<id>openmrs-repo-contrib</id>
+			<name>Contrib</name>
+			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/contrib/</url>
+		</repository>
+		<snapshotRepository>
+			<id>openmrs-repo-snapshots</id>
+			<name>OpenMRS Snapshots</name>
+			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 </project>

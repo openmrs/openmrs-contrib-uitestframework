@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -25,6 +26,7 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.QueryDataSet;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.mysql.MySqlDataTypeFactory;
 import org.dbunit.ext.mysql.MySqlMetadataHandler;
@@ -42,12 +44,18 @@ import org.openmrs.uitestframework.page.GenericPage;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
+import org.openmrs.uitestframework.test.TestData.PatientInfo;
+import org.openmrs.uitestframework.test.TestData.TestPatient;
+import org.openmrs.uitestframework.test.TestData.TestPerson;
+import org.openmrs.uitestframework.test.TestData.TestPersonAddress;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class TestBase {
 	
@@ -300,6 +308,12 @@ public class TestBase {
 		getDbTester().setDataSet(dataSet);
 	}
 	
+	public void deletePatientUuid(String uuid) throws DataSetException, SQLException, Exception {
+		ITable query = getDbTester().getConnection().createQueryTable("person", "select * from person where uuid = \"" + uuid + "\"");
+		Integer id = (Integer) query.getValue(0, "person_id");
+		deletePatient(id.toString());
+	}
+	
 	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id) throws AmbiguousTableNameException {
 		dataSet.addTable(tableName, formatQuery(simpleQuery(tableName, columnName), id));
 	}
@@ -311,5 +325,39 @@ public class TestBase {
 	static String formatQuery(String query, String id) {
 		return String.format(query, id);
 	}
+	
+	public String createTestPatient() {
+		PatientInfo pi = TestData.generateRandomPatient();
+		TestPerson tp = new TestPerson(pi.givenName, pi.middleName, pi.familyName, pi.gender, makeBirthdate(pi));
+		tp.addAddress(new TestPersonAddress(pi.address1, pi.address2, pi.city, pi.state, pi.postalCode, pi.country));
+		String uuid = createPerson(tp);
+		createPatient(uuid);
+		return uuid;
+	}
+	
+	public static final String BDAY_SEP = "-";
+	private String makeBirthdate(PatientInfo pi) {
+	    return pi.birthYear + BDAY_SEP + pi.birthMonthIndex + BDAY_SEP + pi.birthDay;
+    }
+
+	/**
+	 * Add a Person to the database and return it's uuid.
+	 * 
+	 * @param person The (test) Person to add to the database.
+	 * @return The new Person's uuid.
+	 */
+	public String createPerson(TestPerson person) {
+	    JsonNode json = RestClient.post("person", person);
+	    JsonNode uuid = json.get("uuid");
+	    return uuid == null ? null : json.get("uuid").asText();
+    }
+	
+	public void createPatient(String personUuid) {
+	    RestClient.post("patient", new TestPatient(personUuid, generatePatientIdentifier()));
+	}
+
+	private String generatePatientIdentifier() {
+	    return RestClient.generatePatientIdentifier();
+    }
 
 }
