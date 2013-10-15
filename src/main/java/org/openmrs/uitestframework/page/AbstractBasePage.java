@@ -28,11 +28,13 @@ public abstract class AbstractBasePage implements Page {
     protected TestProperties properties = TestProperties.instance();
     protected WebDriver driver;
     private String serverURL;
+    protected WebDriverWait waiter;
 
     public AbstractBasePage(WebDriver driver) {
         this.driver = driver;
         serverURL = properties.getWebAppUrl();
         URL_ROOT = "/" + StringUtils.substringAfterLast(serverURL, "/");
+        waiter = new WebDriverWait(driver, MAX_WAIT_SECONDS);
     }
 
     @Override
@@ -46,8 +48,7 @@ public abstract class AbstractBasePage implements Page {
     
     @Override
     public WebElement findElement(By by) {
-    	WebDriverWait wait = new WebDriverWait(driver, MAX_WAIT_SECONDS);
-    	wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    	waiter.until(ExpectedConditions.presenceOfElementLocated(by));
     	return driver.findElement(by);
     }
 
@@ -116,8 +117,7 @@ public abstract class AbstractBasePage implements Page {
 
     @Override
     public List<WebElement> findElements(By by) {
-    	WebDriverWait wait = new WebDriverWait(driver, MAX_WAIT_SECONDS);
-    	wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    	waiter.until(ExpectedConditions.presenceOfElementLocated(by));
         return driver.findElements(by);
     }
 	
@@ -139,8 +139,7 @@ public abstract class AbstractBasePage implements Page {
 	}
 
 	public void waitForFocusById(final String id) {
-    	WebDriverWait wait = new WebDriverWait(driver, 10);
-    	wait.until(new ExpectedCondition<Boolean>() {
+    	waiter.until(new ExpectedCondition<Boolean>() {
     	      @Override
     	      public Boolean apply(WebDriver driver) {
     	        return hasFocus(id);
@@ -149,8 +148,7 @@ public abstract class AbstractBasePage implements Page {
     }
 
     public void waitForFocusByCss(final String tag, final String attr, final String value) {
-    	WebDriverWait wait = new WebDriverWait(driver, 10);
-    	wait.until(new ExpectedCondition<Boolean>() {
+    	waiter.until(new ExpectedCondition<Boolean>() {
     		@Override
     		public Boolean apply(WebDriver driver) {
     			return hasFocus(tag, attr, value);
@@ -159,8 +157,7 @@ public abstract class AbstractBasePage implements Page {
     }
 
     public void waitForJsVariable(final String varName) {
-    	WebDriverWait wait = new WebDriverWait(driver, MAX_WAIT_SECONDS*3);
-    	wait.until(new ExpectedCondition<Boolean>() {
+    	waiter.until(new ExpectedCondition<Boolean>() {
     	      @Override
     	      public Boolean apply(WebDriver driver) {
     	        return (Boolean) ((JavascriptExecutor)driver).executeScript("return " + varName, new Object[] {});
@@ -174,6 +171,10 @@ public abstract class AbstractBasePage implements Page {
     
     boolean hasFocus(String tag, String attr, String value) {
     	return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
+    }
+
+	public void waitForElement(By by) {
+    	waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
 }
