@@ -68,16 +68,25 @@ public abstract class AbstractBasePage implements Page {
     }
 
     @Override
+    public void setTextToFieldNoEnter(By textFieldId, String text) {
+    	setTextNoEnter(findElement(textFieldId), text);
+    }
+    
+    @Override
     public void setTextToFieldInsideSpan(String spanId, String text) {
         setText(findTextFieldInsideSpan(spanId), text);
     }
 
     private void setText(WebElement element, String text) {
-        element.clear();
-        element.sendKeys(text);
+    	setTextNoEnter(element, text);
         element.sendKeys(Keys.RETURN);
     }
 
+    private void setTextNoEnter(WebElement element, String text) {
+    	element.clear();
+    	element.sendKeys(text);
+    }
+    
     @Override
     public void clickOn(By by) {
         findElement(by).click();

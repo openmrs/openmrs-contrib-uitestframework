@@ -51,4 +51,9 @@ public interface Page {
 	 */
 	String expectedUrlPath();
 
+	/**
+	 * Same as setTextToField, but does not send an ENTER key after.
+	 */
+	void setTextToFieldNoEnter(By textFieldId, String text);
+
 }

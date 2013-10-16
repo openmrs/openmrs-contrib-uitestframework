@@ -79,7 +79,7 @@ public class TestBase {
 				driver = setupChromeDriver();
 				break;
 		}
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
 		goToLoginPage(); // TODO is this right? do we always want to go to the start page?
 	}
 	

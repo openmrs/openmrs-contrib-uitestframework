@@ -25,8 +25,8 @@ public class LoginPage extends AbstractBasePage {
 	}
 	
 	public void login(String user, String password) {
-		setTextToField(By.id(USERNAME_TEXTBOX_ID), user);
-		setTextToField(By.id(PASSWORD_TEXTBOX_ID), password);
+		setTextToFieldNoEnter(By.id(USERNAME_TEXTBOX_ID), user);
+		setTextToFieldNoEnter(By.id(PASSWORD_TEXTBOX_ID), password);
         clickOn(By.id(UNKOWN_LOCATION_ELEMENT_ID));	// TODO, not sure this belongs here because Mirebalais doesn't use it?, or at least make it optional? 
 		clickOn(By.id(LOGIN_BUTTON_ID));
 		findElement(byFromHref(URL_ROOT + LOGOUT_PATH));	// this waits until the Logoff link is present
