@@ -305,6 +305,7 @@ public class TestBase {
 		addSimpleQuery(dataSet, "patient_identifier", "patient_id", id);
 		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", id));
 		addSimpleQuery(dataSet, "person_attribute", "person_id", id);
+		addSimpleQuery(dataSet, "visit", "patient_id", id);
 		getDbTester().setDataSet(dataSet);
 	}
 	

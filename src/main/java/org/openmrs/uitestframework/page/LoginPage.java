@@ -13,6 +13,8 @@ public class LoginPage extends AbstractBasePage {
 	static final String LOGOUT_PATH = "/logout";
 	static final String CLERK_USERNAME = "clerk";
 	static final String CLERK_PASSWORD = "Clerk123";
+	static final String NURSE_USERNAME = "nurse";
+	static final String NURSE_PASSWORD = "Nurse123";
 	
 	private String UserName;
 	
@@ -43,5 +45,9 @@ public class LoginPage extends AbstractBasePage {
 
 	public void loginAsClerk() {
 	    login(CLERK_USERNAME, CLERK_PASSWORD);
+    }
+
+	public void loginAsNurse() {
+		login(NURSE_USERNAME, NURSE_PASSWORD);
     }
 }
