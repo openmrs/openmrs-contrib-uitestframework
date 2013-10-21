@@ -15,6 +15,8 @@ public class LoginPage extends AbstractBasePage {
 	static final String CLERK_PASSWORD = "Clerk123";
 	static final String NURSE_USERNAME = "nurse";
 	static final String NURSE_PASSWORD = "Nurse123";
+	static final String DOCTOR_USERNAME = "doctor";
+	static final String DOCTOR_PASSWORD = "Doctor123";
 	
 	private String UserName;
 	
@@ -49,5 +51,9 @@ public class LoginPage extends AbstractBasePage {
 
 	public void loginAsNurse() {
 		login(NURSE_USERNAME, NURSE_PASSWORD);
+    }
+
+	public void loginAsDoctor() {
+		login(DOCTOR_USERNAME, DOCTOR_PASSWORD);
     }
 }

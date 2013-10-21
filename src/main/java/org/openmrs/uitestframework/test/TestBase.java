@@ -306,6 +306,9 @@ public class TestBase {
 		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", id));
 		addSimpleQuery(dataSet, "person_attribute", "person_id", id);
 		addSimpleQuery(dataSet, "visit", "patient_id", id);
+		addSimpleQuery(dataSet, "encounter", "patient_id", id);
+		dataSet.addTable("encounter_provider", formatQuery("select * from encounter_provider where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
+		dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
 		getDbTester().setDataSet(dataSet);
 	}
 	

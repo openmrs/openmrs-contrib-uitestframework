@@ -45,10 +45,10 @@ public class RestClient {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
         try {
         	String objectAsJson = object.asJson();
-        	System.out.println("post " + restPath + " " + objectAsJson);
+//        	System.out.println("post " + restPath + " " + objectAsJson);
 			Entity<String> entity = Entity.entity(objectAsJson, MediaType.APPLICATION_JSON_TYPE);
         	String json = target.request(MediaType.APPLICATION_JSON_TYPE).post(entity, String.class);
-        	System.out.println("\t=> " + json);
+//        	System.out.println("\t=> " + json);
 	        return new ObjectMapper().readValue(json, JsonNode.class);
         }
         catch (JsonParseException e) {
