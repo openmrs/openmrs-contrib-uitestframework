@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +22,7 @@ public class TestData {
 		return SINGLETON;
 	}
 	
-	private static final String OPENMRS_PATIENT_IDENTIFIER_TYPE = "OpenMRS ID";
+	public static final String OPENMRS_PATIENT_IDENTIFIER_TYPE = "OpenMRS ID";
 	
 	/*
 	 * Note that all these TestXXX classes are intended to be used with REST
@@ -129,9 +131,9 @@ public class TestData {
 		
 		public List<PatientIdentifier> identifiers = new ArrayList<PatientIdentifier>();
 		
-		public TestPatient(String uuid, String identifier) {
+		public TestPatient(String uuid, String identifier, String identifierTypeName) {
 			this.person = uuid;
-			this.identifiers.add(new PatientIdentifier(identifier));
+			this.identifiers.add(new PatientIdentifier(identifier, identifierTypeName));
 		}
 	}
 	
@@ -139,13 +141,14 @@ public class TestData {
 		
 		public String identifier;
 		
-		public String identifierType = getIdentifierType(OPENMRS_PATIENT_IDENTIFIER_TYPE);
+		public String identifierType;
 		
 		public String location = getALocation();
 		
 		public boolean preferred = true;
 		
-		public PatientIdentifier(String identifier) {
+		public PatientIdentifier(String identifier, String identifierTypeName) {
+			this.identifierType = getIdentifierTypeUuid(identifierTypeName);
 			this.identifier = identifier;
 		}
 	}
@@ -155,7 +158,7 @@ public class TestData {
 		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
 	}
 	
-	public static String getIdentifierType(String name) {
+	public static String getIdentifierTypeUuid(String name) {
 		JsonNode json = RestClient.get("patientidentifiertype");
 		JsonNode results = json.get("results");
 		for (int i = 0; i < results.size(); i++) {
@@ -166,6 +169,11 @@ public class TestData {
 			}
 		}
 		return null;
+	}
+	
+	public static String getPatientId(String uuid) {
+		JsonNode json = RestClient.get("patient/" + uuid, "id");
+		return json.get("id").asText();
 	}
 	
 	public static class PatientInfo {
@@ -184,6 +192,10 @@ public class TestData {
 		public String country;
 		public String phone;
 		public String postalCode;
+		// The rest are filled in from database.
+		public String uuid;
+		public String identifier;
+		public String id;
 	}
 
 	public static PatientInfo generateRandomPatient() {
@@ -229,8 +241,8 @@ public class TestData {
 	}
 	
 	static String randomSuffix(int digits) {
-		// First n digits of the current time.
-		return String.valueOf(System.currentTimeMillis()).substring(0, digits);
+		// Last n digits of the current time.
+		return StringUtils.right(String.valueOf(System.currentTimeMillis()), digits);
 	}
 
 }

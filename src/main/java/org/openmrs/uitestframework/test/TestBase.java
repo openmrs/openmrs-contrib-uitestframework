@@ -48,6 +48,7 @@ import org.openmrs.uitestframework.test.TestData.PatientInfo;
 import org.openmrs.uitestframework.test.TestData.TestPatient;
 import org.openmrs.uitestframework.test.TestData.TestPerson;
 import org.openmrs.uitestframework.test.TestData.TestPersonAddress;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -330,13 +331,19 @@ public class TestBase {
 		return String.format(query, id);
 	}
 	
-	public String createTestPatient() {
+	public PatientInfo createTestPatient(String patientIdentifierTypeName) {
 		PatientInfo pi = TestData.generateRandomPatient();
 		TestPerson tp = new TestPerson(pi.givenName, pi.middleName, pi.familyName, pi.gender, makeBirthdate(pi));
 		tp.addAddress(new TestPersonAddress(pi.address1, pi.address2, pi.city, pi.state, pi.postalCode, pi.country));
 		String uuid = createPerson(tp);
-		createPatient(uuid);
-		return uuid;
+		pi.identifier = createPatient(uuid, patientIdentifierTypeName);
+		pi.uuid = uuid;
+		pi.id = TestData.getPatientId(uuid);
+		return pi;
+	}
+
+	public PatientInfo createTestPatient() {
+		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE);
 	}
 	
 	public static final String BDAY_SEP = "-";
@@ -356,12 +363,22 @@ public class TestBase {
 	    return uuid == null ? null : json.get("uuid").asText();
     }
 	
-	public void createPatient(String personUuid) {
-	    RestClient.post("patient", new TestPatient(personUuid, generatePatientIdentifier()));
+	public String createPatient(String personUuid, String patientIdentifierType) {
+	    String patientIdentifier = generatePatientIdentifier();
+		RestClient.post("patient", new TestPatient(personUuid, patientIdentifier, patientIdentifierType));
+		return patientIdentifier;
 	}
 
 	private String generatePatientIdentifier() {
 	    return RestClient.generatePatientIdentifier();
     }
+
+	public String getContentText() {
+		return driver.findElement(By.id("content")).getText();
+	}
+
+	public String pageContent() {
+		return driver.findElement(By.id("content")).getText();
+	}
 
 }

@@ -22,7 +22,15 @@ public class RestClient {
 	private static final String REST_ROOT = "/ws/rest/v1/";
 
 	public static JsonNode get(String restPath) {
-		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("v", "full");
+		return get(restPath, null);
+    }
+	
+	// columns is a comma separated list (or null)
+	public static JsonNode get(String restPath, String columns) {
+		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
+		if (columns != null) {
+			target = target.queryParam("v", "custom:(" + columns + ")");
+		}
 		String jsonString = target.request().get(String.class);
         try {
 	        return new ObjectMapper().readValue(jsonString, JsonNode.class);
@@ -39,8 +47,8 @@ public class RestClient {
 	        log("error during REST get", e);
 	        return null;
         }
-    }
-	
+	}
+
 	public static JsonNode post(String restPath, JsonTestClass object) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
         try {
