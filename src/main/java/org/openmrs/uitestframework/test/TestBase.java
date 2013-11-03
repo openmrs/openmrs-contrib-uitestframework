@@ -373,10 +373,6 @@ public class TestBase {
 	    return RestClient.generatePatientIdentifier();
     }
 
-	public String getContentText() {
-		return driver.findElement(By.id("content")).getText();
-	}
-
 	public String pageContent() {
 		return driver.findElement(By.id("content")).getText();
 	}

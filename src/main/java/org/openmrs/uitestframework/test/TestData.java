@@ -196,6 +196,10 @@ public class TestData {
 		public String uuid;
 		public String identifier;
 		public String id;
+		
+		public String getName() {
+			return givenName + " " + middleName + " " + familyName;
+		}
 	}
 
 	public static PatientInfo generateRandomPatient() {
