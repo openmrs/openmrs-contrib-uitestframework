@@ -33,6 +33,7 @@ import org.dbunit.ext.mysql.MySqlMetadataHandler;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -62,8 +63,10 @@ public class TestBase {
 	
 	protected static WebDriver driver;
 	
-	private static IDatabaseTester dbTester;
+	protected static IDatabaseTester dbTester;
 	
+	protected LoginPage loginPage;
+
 	@BeforeClass
 	public static void startWebDriver() {
 		final TestProperties properties = TestProperties.instance();
@@ -89,6 +92,16 @@ public class TestBase {
 		driver.quit();
 	}
 	
+	@Before
+	public void initLoginPage() {
+		loginPage = new LoginPage(driver);
+	}
+	
+    public void login() {
+    	assertPage(loginPage);
+    	loginPage.loginAsAdmin();
+    }
+
     public static IDatabaseTester getDbTester() throws Exception {
     	if (dbTester == null) {
     		initDatabaseConnection();
@@ -174,6 +187,7 @@ public class TestBase {
 			takeScreenshot(test.getDisplayName());
 		}
 	};
+
 	
 	static WebDriver setupFirefoxDriver() {
 		driver = new FirefoxDriver();
