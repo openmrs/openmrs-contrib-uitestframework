@@ -186,4 +186,8 @@ public abstract class AbstractBasePage implements Page {
     	waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
+	public void waitForTextToBePresentInElement(By by, String text) {
+		waiter.until(ExpectedConditions.textToBePresentInElement(by, text));
+	}
+	
 }
