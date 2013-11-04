@@ -20,6 +20,8 @@ public interface Page {
 	
 	void setTextToField(By by, String text);
 	
+	void setTextToField(String id, String text);
+	
 	void setTextToFieldInsideSpan(String spanId, String text);
 	
 	void clickOn(By by);

@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class AbstractBasePage implements Page {
 	
 	public final String URL_ROOT;
-	public static final int MAX_WAIT_SECONDS = 10;
+	public static final int MAX_WAIT_SECONDS = 5;
 	
     protected TestProperties properties = TestProperties.instance();
     protected WebDriver driver;
@@ -63,13 +63,18 @@ public abstract class AbstractBasePage implements Page {
     }
 
     @Override
-    public void setTextToField(By textFieldId, String text) {
-        setText(findElement(textFieldId), text);
+    public void setTextToField(By by, String text) {
+        setText(findElement(by), text);
     }
 
     @Override
-    public void setTextToFieldNoEnter(By textFieldId, String text) {
-    	setTextNoEnter(findElement(textFieldId), text);
+    public void setTextToField(String id, String text) {
+    	setText(findElement(By.id(id)), text);
+    }
+    
+    @Override
+    public void setTextToFieldNoEnter(By by, String text) {
+    	setTextNoEnter(findElement(by), text);
     }
     
     @Override

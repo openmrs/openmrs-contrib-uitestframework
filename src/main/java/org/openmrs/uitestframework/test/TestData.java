@@ -200,6 +200,10 @@ public class TestData {
 		public String getName() {
 			return givenName + " " + middleName + " " + familyName;
 		}
+		@Override
+		public String toString() {
+			return getName() + ", " + identifier + ", " + id;
+		}
 	}
 
 	public static PatientInfo generateRandomPatient() {
