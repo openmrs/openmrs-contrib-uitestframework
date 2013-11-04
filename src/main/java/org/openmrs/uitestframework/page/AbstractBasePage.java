@@ -63,12 +63,12 @@ public abstract class AbstractBasePage implements Page {
     }
 
     @Override
-    public void setTextToField(By by, String text) {
+    public void setText(By by, String text) {
         setText(findElement(by), text);
     }
 
     @Override
-    public void setTextToField(String id, String text) {
+    public void setText(String id, String text) {
     	setText(findElement(By.id(id)), text);
     }
     

@@ -18,9 +18,9 @@ public interface Page {
 	
 	String getText(By by);
 	
-	void setTextToField(By by, String text);
+	void setText(By by, String text);
 	
-	void setTextToField(String id, String text);
+	void setText(String id, String text);
 	
 	void setTextToFieldInsideSpan(String spanId, String text);
 	
