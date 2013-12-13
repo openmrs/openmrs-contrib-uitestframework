@@ -46,9 +46,9 @@ import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
 import org.openmrs.uitestframework.test.TestData.PatientInfo;
+import org.openmrs.uitestframework.test.TestData.RoleInfo;
 import org.openmrs.uitestframework.test.TestData.TestPatient;
-import org.openmrs.uitestframework.test.TestData.TestPerson;
-import org.openmrs.uitestframework.test.TestData.TestPersonAddress;
+import org.openmrs.uitestframework.test.TestData.UserInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -57,13 +57,25 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
+/**
+ * Superclass for all UI Tests. Contains lots of handy "utilities"
+ * needed to setup and tear down tests as well as handy methods
+ * needed during tests, such as:
+ *  - initialize Selenium WebDriver
+ *  - create (and delete) test patient, @see {@link #createTestPatient()}
+ *  - @see {@link #currentPage()}
+ *  - @see {@link #assertPage(Page)}
+ *  - @see {@link #pageContent()}
+ */
 public class TestBase {
 	
 	protected static WebDriver driver;
 	
 	protected static IDatabaseTester dbTester;
+	
+	protected static QueryDataSet deleteDataSet;
+	
+	public static final String DEFAULT_ROLE = "Privilege Level: Full";
 	
 	protected LoginPage loginPage;
 
@@ -158,8 +170,25 @@ public class TestBase {
 	 * Typically invoked from an @After method.
 	 */
 	public void dbUnitTearDown() throws Exception {
-		getDbTester().setTearDownOperation(dbUnitTearDownOperation());
+		dbUnitTearDownStatic(dbUnitTearDownOperation());
+	}
+	
+	/**
+	 * Typically invoked from an @AfterClass method.
+	 */
+	public static void dbUnitTearDownStatic() throws Exception {
+		dbUnitTearDownStatic(DatabaseOperation.DELETE);
+	}
+	
+	public static void dbUnitTearDownStatic(DatabaseOperation op) throws Exception {
+		if (deleteDataSet == null) {
+			return;
+		}
+		getDbTester().setDataSet(deleteDataSet);
+//System.out.println("teardown dataset: " + Arrays.asList(getDbTester().getDataSet().getTableNames()));
+		getDbTester().setTearDownOperation(op);
 		getDbTester().onTearDown();
+		deleteDataSet = null;
 	}
 	
 	/**
@@ -169,8 +198,11 @@ public class TestBase {
 	    return DatabaseOperation.DELETE;
     }
 
-	protected QueryDataSet newQueryDataSet() throws Exception {
-	    return new QueryDataSet(getDbTester().getConnection());
+	protected static QueryDataSet getDeleteDataSet() throws Exception {
+		if (deleteDataSet == null) {
+			deleteDataSet = new QueryDataSet(getDbTester().getConnection());
+		}
+		return deleteDataSet;
     }
 
 	public static void goToLoginPage() {
@@ -267,7 +299,7 @@ public class TestBase {
 	 * 
 	 * @param expected page
 	 */
-	public void assertPage(Page expected) {
+	public static void assertPage(Page expected) {
 		assertEquals(expected.expectedUrlPath(), currentPage().urlPath());
 	}
 	
@@ -312,7 +344,7 @@ public class TestBase {
 	public void deletePatient(String id) throws Exception {
 		// See org.openmrs.module.mirebalais.smoke.helper.PatientDatabaseHandler.initializePatientTablesToDelete() for more details.
 		// Also see /mirebalais-smoke-test/src/test/resources/datasets/patients_dataset.xml.hbs
-		QueryDataSet dataSet = newQueryDataSet();
+		QueryDataSet dataSet = getDeleteDataSet();
 		addSimpleQuery(dataSet, "person", "person_id", id);
 		addSimpleQuery(dataSet, "patient", "patient_id", id);
 		addSimpleQuery(dataSet, "person_name", "person_id", id);
@@ -324,7 +356,6 @@ public class TestBase {
 		addSimpleQuery(dataSet, "encounter", "patient_id", id);
 		dataSet.addTable("encounter_provider", formatQuery("select * from encounter_provider where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
 		dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
-		getDbTester().setDataSet(dataSet);
 	}
 	
 	public void deletePatientUuid(String uuid) throws DataSetException, SQLException, Exception {
@@ -333,8 +364,49 @@ public class TestBase {
 		deletePatient(id.toString());
 	}
 	
+	/**
+	 * Delete the given user from the various tables that contain
+	 * portions of a user's info. Note this does not do the actual
+	 * deletion, that is done via DbUnit in the tearDown method
+	 * using the DatabaseOperation.DELETE operation, which must be
+	 * "enabled" by calling dbUnitTearDown() after calling
+	 * deleteUser().
+	 * 
+	 * @param user The database user info, especially the user_id and person_id.
+	 */
+	public static void deleteUser(UserInfo user) throws Exception {
+		// See org.openmrs.module.mirebalais.smoke.helper.UserDatabaseHandler.addUserForDelete(String) for more details.
+		String userid = user.userId;
+		String personid = user.id;
+		QueryDataSet dataSet = getDeleteDataSet();
+		addSimpleQuery(dataSet, "person", "person_id", personid);
+		addSimpleQuery(dataSet, "provider", "person_id", personid);
+		addSimpleQuery(dataSet, "person_name", "person_id", personid);
+		addSimpleQuery(dataSet, "person_address", "person_id", personid);
+		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", personid));
+		addSimpleQuery(dataSet, "person_attribute", "person_id", personid);
+		addSimpleQuery(dataSet, "users", "user_id", userid);
+		addSimpleQuery(dataSet, "user_role", "user_id", userid);
+		addSimpleQuery(dataSet, "user_property", "user_id", userid);
+	}
+	
+	/**
+	 * Delete the given role from the role table. Note this does not do the actual
+	 * deletion, that is done via DbUnit in the tearDown method
+	 * using the DatabaseOperation.DELETE operation, which must be
+	 * "enabled" by calling dbUnitTearDown() after calling
+	 * deleteUser().
+	 * 
+	 * @param user The database user info, especially the user_id and person_id.
+	 */
+	public static void deleteRole(RoleInfo role) throws Exception {
+		QueryDataSet dataSet = getDeleteDataSet();
+		addSimpleQuery(dataSet, "role", "uuid", '"' + role.uuid + '"');
+	}
+	
 	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id) throws AmbiguousTableNameException {
-		dataSet.addTable(tableName, formatQuery(simpleQuery(tableName, columnName), id));
+		String query = formatQuery(simpleQuery(tableName, columnName), id);
+		dataSet.addTable(tableName, query);
 	}
 	
 	static String simpleQuery(String tableName, String columnName) {
@@ -347,12 +419,8 @@ public class TestBase {
 	
 	public PatientInfo createTestPatient(String patientIdentifierTypeName) {
 		PatientInfo pi = TestData.generateRandomPatient();
-		TestPerson tp = new TestPerson(pi.givenName, pi.middleName, pi.familyName, pi.gender, makeBirthdate(pi));
-		tp.addAddress(new TestPersonAddress(pi.address1, pi.address2, pi.city, pi.state, pi.postalCode, pi.country));
-		String uuid = createPerson(tp);
+		String uuid = TestData.createPerson(pi);
 		pi.identifier = createPatient(uuid, patientIdentifierTypeName);
-		pi.uuid = uuid;
-		pi.id = TestData.getPatientId(uuid);
 		return pi;
 	}
 
@@ -360,23 +428,14 @@ public class TestBase {
 		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE);
 	}
 	
-	public static final String BDAY_SEP = "-";
-	private String makeBirthdate(PatientInfo pi) {
-	    return pi.birthYear + BDAY_SEP + pi.birthMonthIndex + BDAY_SEP + pi.birthDay;
-    }
-
 	/**
-	 * Add a Person to the database and return it's uuid.
+	 * Create a Patient in the database and return its Patient Identifier.
+	 * The Patient Identifier is obtained from the database.
 	 * 
-	 * @param person The (test) Person to add to the database.
-	 * @return The new Person's uuid.
+	 * @param personUuid The person 
+	 * @param patientIdentifierType The type of Patient Identifier to use
+	 * @return The Patient Identifier for the newly created patient
 	 */
-	public String createPerson(TestPerson person) {
-	    JsonNode json = RestClient.post("person", person);
-	    JsonNode uuid = json.get("uuid");
-	    return uuid == null ? null : json.get("uuid").asText();
-    }
-	
 	public String createPatient(String personUuid, String patientIdentifierType) {
 	    String patientIdentifier = generatePatientIdentifier();
 		RestClient.post("patient", new TestPatient(personUuid, patientIdentifier, patientIdentifierType));
@@ -387,8 +446,38 @@ public class TestBase {
 	    return RestClient.generatePatientIdentifier();
     }
 
+	/**
+	 * Returns the entire text of the "content" part of the current page
+	 * 
+	 * @return the entire text of the "content" part of the current page
+	 */
 	public String pageContent() {
 		return driver.findElement(By.id("content")).getText();
+	}
+	
+	/**
+	 * Create a User in the database and return its uuid.
+	 */
+	public static UserInfo createUser(String username, RoleInfo role) {
+		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());
+		TestData.createPerson(ui);
+		ui.username = username;
+		ui.addRole(role);
+		ui.addRole(DEFAULT_ROLE);
+		TestData.createUser(ui);
+		return ui;
+	}
+	
+	public static RoleInfo createRole(String name) {
+		RoleInfo ri = new RoleInfo(name);
+		TestData.createRole(ri);
+		return ri;
+	}
+	
+	public static void login(UserInfo user) {
+		LoginPage page = new LoginPage(driver);
+    	assertPage(page);
+		page.login(user.username, user.password);
 	}
 
 }
