@@ -317,6 +317,7 @@ public class TestData {
 		public String name;
 		public String description = "Test Role Description";
 		public String uuid;
+		public boolean created;
 
 		public RoleInfo(String nameArg) {
 			name = nameArg;

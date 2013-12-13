@@ -400,6 +400,9 @@ public class TestBase {
 	 * @param user The database user info, especially the user_id and person_id.
 	 */
 	public static void deleteRole(RoleInfo role) throws Exception {
+		if (! role.created) {
+			return;
+		}
 		QueryDataSet dataSet = getDeleteDataSet();
 		addSimpleQuery(dataSet, "role", "uuid", '"' + role.uuid + '"');
 	}
@@ -471,6 +474,19 @@ public class TestBase {
 	public static RoleInfo createRole(String name) {
 		RoleInfo ri = new RoleInfo(name);
 		TestData.createRole(ri);
+		return ri;
+	}
+	
+	public static RoleInfo findOrCreateRole(String name) {
+		RoleInfo ri = new RoleInfo(name);
+		String uuid = TestData.getRoleUuid(name);
+		if (uuid == null) {
+			TestData.createRole(ri);
+			ri.created = true;
+		} else {
+			ri.uuid = uuid;
+			ri.created = false;
+		}
 		return ri;
 	}
 	
