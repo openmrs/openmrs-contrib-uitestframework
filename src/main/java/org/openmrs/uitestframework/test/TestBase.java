@@ -333,11 +333,17 @@ public class TestBase {
 
     /**
      * Delete the given patient from the various tables that contain
-     * portions of a patient's info. Note this does not do the actual
-     * deletion, that is done via DbUnit in the tearDown method
-     * using the DatabaseOperation.DELETE operation, which must be
-     * "enabled" by calling dbUnitTearDown() after calling
-     * deletePatient().
+     * portions of a patient's info. 
+     * 
+     * @param patient The info for the patient to delete.
+     */
+    public void deletePatient(PatientInfo patient) throws DataSetException, SQLException, Exception {
+    	deletePatientUuid(patient.uuid);
+    }
+    
+    /**
+     * Delete the given patient from the various tables that contain
+     * portions of a patient's info. 
      * 
      * @param id The database patient_id column.
      */
@@ -356,6 +362,7 @@ public class TestBase {
 		addSimpleQuery(dataSet, "encounter", "patient_id", id);
 		dataSet.addTable("encounter_provider", formatQuery("select * from encounter_provider where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
 		dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
+		dbUnitTearDown();
 	}
 	
 	public void deletePatientUuid(String uuid) throws DataSetException, SQLException, Exception {
@@ -366,11 +373,7 @@ public class TestBase {
 	
 	/**
 	 * Delete the given user from the various tables that contain
-	 * portions of a user's info. Note this does not do the actual
-	 * deletion, that is done via DbUnit in the tearDown method
-	 * using the DatabaseOperation.DELETE operation, which must be
-	 * "enabled" by calling dbUnitTearDown() after calling
-	 * deleteUser().
+	 * portions of a user's info. 
 	 * 
 	 * @param user The database user info, especially the user_id and person_id.
 	 */
@@ -388,16 +391,14 @@ public class TestBase {
 		addSimpleQuery(dataSet, "users", "user_id", userid);
 		addSimpleQuery(dataSet, "user_role", "user_id", userid);
 		addSimpleQuery(dataSet, "user_property", "user_id", userid);
+		dbUnitTearDownStatic();
 	}
 	
 	/**
-	 * Delete the given role from the role table. Note this does not do the actual
-	 * deletion, that is done via DbUnit in the tearDown method
-	 * using the DatabaseOperation.DELETE operation, which must be
-	 * "enabled" by calling dbUnitTearDown() after calling
-	 * deleteUser().
+	 * Delete the given role from the role table, if it was created
+	 * by this framework.  
 	 * 
-	 * @param user The database user info, especially the user_id and person_id.
+	 * @param user The database role info.
 	 */
 	public static void deleteRole(RoleInfo role) throws Exception {
 		if (! role.created) {
@@ -405,10 +406,12 @@ public class TestBase {
 		}
 		QueryDataSet dataSet = getDeleteDataSet();
 		addSimpleQuery(dataSet, "role", "uuid", '"' + role.uuid + '"');
+		dbUnitTearDownStatic();
 	}
 	
 	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id) throws AmbiguousTableNameException {
 		String query = formatQuery(simpleQuery(tableName, columnName), id);
+//System.out.println("addSimpleQuery: " + tableName + " " + query);		
 		dataSet.addTable(tableName, query);
 	}
 	
@@ -469,12 +472,6 @@ public class TestBase {
 		ui.addRole(DEFAULT_ROLE);
 		TestData.createUser(ui);
 		return ui;
-	}
-	
-	public static RoleInfo createRole(String name) {
-		RoleInfo ri = new RoleInfo(name);
-		TestData.createRole(ri);
-		return ri;
 	}
 	
 	public static RoleInfo findOrCreateRole(String name) {
