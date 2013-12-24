@@ -338,7 +338,11 @@ public class TestBase {
      * @param patient The info for the patient to delete.
      */
     public void deletePatient(PatientInfo patient) throws DataSetException, SQLException, Exception {
-    	deletePatientUuid(patient.uuid);
+    	if (patient.id != null) {
+    		deletePatient(patient.id);
+    	} else if (patient.uuid != null) {
+    		deletePatientUuid(patient.uuid);
+    	}
     }
     
     /**
