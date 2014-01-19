@@ -1,8 +1,10 @@
 package org.openmrs.uitestframework.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +30,8 @@ public class TestData {
 
 	/*
 	 * Note that all these TestXXX classes are intended to be used with REST
-	 * which means the field names must match the expected REST API params.
+	 * which means the field names must match the expected REST API params
+	 * as specified here: https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9
 	 */
 
 	public abstract static class JsonTestClass {
@@ -69,6 +72,9 @@ public class TestData {
 		}
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Person
+	 */
 	public static class TestPerson extends JsonTestClass {
 		public Set<TestPersonName> names = new HashSet<TestPersonName>();
 		public Set<TestPersonAddress> addresses = new HashSet<TestPersonAddress>();
@@ -106,6 +112,9 @@ public class TestData {
 
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-PersonName
+	 */
 	public static class TestPersonName extends JsonTestClass {
 		public String givenName;
 		public String familyName;
@@ -129,6 +138,9 @@ public class TestData {
 
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-PersonAddress
+	 */
 	public static class TestPersonAddress extends JsonTestClass {
 		public String address1;
 		public String address2;
@@ -155,6 +167,9 @@ public class TestData {
 
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Patient
+	 */
 	public static class TestPatient extends JsonTestClass {
 		public String person; // uuid
 		public List<PatientIdentifier> identifiers = new ArrayList<PatientIdentifier>();
@@ -172,6 +187,9 @@ public class TestData {
 		}
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-PatientIdentifier
+	 */
 	public static class PatientIdentifier extends JsonTestClass {
 		public String identifier;
 		public String identifierType;
@@ -189,16 +207,22 @@ public class TestData {
 		}
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-User
+	 */
 	public static class TestUser extends JsonTestClass {
 		public String username;
 		public String password = DEFAULT_PWD;
 		public String person; // uuid
 		public String[] roles;	// uuid's
+		public Map<String, String> userProperties;
 
 		public TestUser(String usernameArg, String uuid, String[] roleUuids) {
 			username = usernameArg;
 			person = uuid;
 			roles = roleUuids;
+			userProperties = new HashMap<String, String>();
+			userProperties.put("defaultLocale", "ht");
 		}
 
 		@Override
@@ -207,6 +231,9 @@ public class TestData {
 		}
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Role
+	 */
 	public static class TestRole extends JsonTestClass {
 		public String name;
 		public String description;
@@ -222,6 +249,27 @@ public class TestData {
 		}
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Encounter
+	 */
+	public static class TestEncounter extends JsonTestClass {
+		public String patient;
+		public String encounterType;
+		public String encounterDatetime;
+
+		public TestEncounter(String encounterTypeArg, String patientArg, String encounterDatetimeArg) {
+			patient = patientArg;
+			encounterType = encounterTypeArg;
+			encounterDatetime = encounterDatetimeArg;
+		}
+
+		@Override
+		public String name() {
+			return "encounter";
+		}
+		
+	}
+	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");
 		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
@@ -336,6 +384,13 @@ public class TestData {
 		return ri.uuid;
 	}
 
+	public static class EncounterInfo {
+		public String type;
+		public PatientInfo patient;
+		public String datetime;
+		public String uuid;
+	}
+	
 	public static PersonInfo generateRandomPerson() {
 		return generateRandomPerson(new PersonInfo());
 	}
@@ -444,4 +499,14 @@ public class TestData {
 		return getFromJsonResults(json, "display", roleName, "uuid");
 	}
 
+	public static String getEncounterTypeUuid(String encounterType) {
+		JsonNode json = RestClient.get("encountertype");
+		return getFromJsonResults(json, "display", encounterType, "uuid");
+	}
+
+	public static void createEncounter(EncounterInfo ei) {
+		TestEncounter te = new TestEncounter(ei.type, ei.patient.uuid, ei.datetime);
+		ei.uuid = te.create();
+	}
+	
 }

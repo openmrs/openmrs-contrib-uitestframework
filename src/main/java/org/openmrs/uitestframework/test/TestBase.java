@@ -45,6 +45,7 @@ import org.openmrs.uitestframework.page.GenericPage;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
+import org.openmrs.uitestframework.test.TestData.EncounterInfo;
 import org.openmrs.uitestframework.test.TestData.PatientInfo;
 import org.openmrs.uitestframework.test.TestData.RoleInfo;
 import org.openmrs.uitestframework.test.TestData.TestPatient;
@@ -465,8 +466,17 @@ public class TestBase {
 		return driver.findElement(By.id("content")).getText();
 	}
 	
+	public EncounterInfo createTestEncounter(String encounterType, PatientInfo patient) {
+		EncounterInfo ei = new EncounterInfo();
+		ei.datetime = "2012-01-04";	// arbitrary
+		ei.type = TestData.getEncounterTypeUuid(encounterType);
+		ei.patient = patient;
+		TestData.createEncounter(ei);	// sets the uuid
+		return ei;
+	}
+
 	/**
-	 * Create a User in the database and return its uuid.
+	 * Create a User in the database and return its info.
 	 */
 	public static UserInfo createUser(String username, RoleInfo role) {
 		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());
