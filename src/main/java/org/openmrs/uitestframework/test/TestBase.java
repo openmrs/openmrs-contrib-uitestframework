@@ -27,6 +27,7 @@ import org.dbunit.database.QueryDataSet;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.mysql.MySqlDataTypeFactory;
 import org.dbunit.ext.mysql.MySqlMetadataHandler;
@@ -49,6 +50,7 @@ import org.openmrs.uitestframework.test.TestData.EncounterInfo;
 import org.openmrs.uitestframework.test.TestData.PatientInfo;
 import org.openmrs.uitestframework.test.TestData.RoleInfo;
 import org.openmrs.uitestframework.test.TestData.TestPatient;
+import org.openmrs.uitestframework.test.TestData.TestProvider;
 import org.openmrs.uitestframework.test.TestData.UserInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -201,10 +203,14 @@ public class TestBase {
 
 	protected static QueryDataSet getDeleteDataSet() throws Exception {
 		if (deleteDataSet == null) {
-			deleteDataSet = new QueryDataSet(getDbTester().getConnection());
+			deleteDataSet = newQueryDataSet();
 		}
 		return deleteDataSet;
     }
+
+	private static QueryDataSet newQueryDataSet() throws Exception {
+		return new QueryDataSet(getDbTester().getConnection());
+	}
 
 	public static void goToLoginPage() {
 		currentPage().gotoPage(LoginPage.LOGIN_PATH);
@@ -355,7 +361,14 @@ public class TestBase {
 	public void deletePatient(String id) throws Exception {
 		// See org.openmrs.module.mirebalais.smoke.helper.PatientDatabaseHandler.initializePatientTablesToDelete() for more details.
 		// Also see /mirebalais-smoke-test/src/test/resources/datasets/patients_dataset.xml.hbs
+		
+		// first delete the obs with no group
 		QueryDataSet dataSet = getDeleteDataSet();
+		dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s) and obs_group_id is not null", id));
+		dbUnitTearDown();
+		
+		// then delete the rest (including obs with a group)
+		dataSet = getDeleteDataSet();
 		addSimpleQuery(dataSet, "person", "person_id", id);
 		addSimpleQuery(dataSet, "patient", "patient_id", id);
 		addSimpleQuery(dataSet, "person_name", "person_id", id);
@@ -476,7 +489,7 @@ public class TestBase {
 	}
 
 	/**
-	 * Create a User in the database and return its info.
+	 * Create a User in the database with the given Role and return its info.
 	 */
 	public static UserInfo createUser(String username, RoleInfo role) {
 		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());
@@ -487,6 +500,57 @@ public class TestBase {
 		TestData.createUser(ui);
 		return ui;
 	}
+
+	/**
+	 * Create a User and Provider in the database with the given role and provider-role and return its info.
+	 */
+	public static UserInfo createUser(String username, RoleInfo role, String providerRole) {
+		return createUser(username, role, providerRole, null);
+	}
+
+	/**
+	 * Create a User and Provider in the database with the given role and provider-role and return its info.
+	 */
+	public static UserInfo createUser(String username, RoleInfo role, String providerRole, String locale) {
+		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());
+		ui.locale = locale;
+		TestData.createPerson(ui);
+		ui.username = username;
+		ui.addRole(role);
+		ui.addRole(DEFAULT_ROLE);
+		TestData.createUser(ui);
+		// create provider
+		String providerUuid = (new TestProvider(ui.uuid, ui.givenName)).create();
+		try {
+			// Hack/workaround the fact that we cannot use REST to set the provider_role_id in the provider table.
+			// This is the only place where we use DbUnit/JDBC directly during test setup, everywhere
+			// else we use REST.
+			String providerId = TestData.getId("provider", providerUuid);
+			String xmlds = "<dataset>"
+					+ "<provider "
+						+ "provider_id='" + providerId
+						+ "' uuid='" + providerUuid
+						+ "' provider_role_id='" + getProviderRoleId(providerRole) + "'/>"
+					+ "</dataset>";
+			FlatXmlDataSet ds = new FlatXmlDataSetBuilder().build(new StringReader(xmlds));
+			getDbTester().setDataSet(ds);
+			getDbTester().setSetUpOperation(DatabaseOperation.UPDATE);
+			getDbTester().onSetup();
+		} catch (DataSetException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ui;
+	}
+	
+	// Part of the above hack to workaround lack of REST support for provider role.
+    private static Integer getProviderRoleId(String providerRoleName) throws Exception {
+        QueryDataSet ds = newQueryDataSet();
+        ds.addTable("providermanagement_provider_role", "select * from providermanagement_provider_role where name = '" + providerRoleName + "'");
+		ITable providerRole = ds.getTable("providermanagement_provider_role");
+        return  (Integer) providerRole.getValue(0, "provider_role_id");
+    }
 	
 	public static RoleInfo findOrCreateRole(String name) {
 		RoleInfo ri = new RoleInfo(name);

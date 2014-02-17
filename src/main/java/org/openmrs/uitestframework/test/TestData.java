@@ -217,12 +217,14 @@ public class TestData {
 		public String[] roles;	// uuid's
 		public Map<String, String> userProperties;
 
-		public TestUser(String usernameArg, String uuid, String[] roleUuids) {
+		public TestUser(String usernameArg, String uuid, String[] roleUuids, String locale) {
 			username = usernameArg;
 			person = uuid;
 			roles = roleUuids;
-			userProperties = new HashMap<String, String>();
-			userProperties.put("defaultLocale", "ht");
+			if (locale != null) {
+				userProperties = new HashMap<String, String>();
+				userProperties.put("defaultLocale", locale);
+			}
 		}
 
 		@Override
@@ -270,6 +272,25 @@ public class TestData {
 		
 	}
 	
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Provider
+	 */
+	public static class TestProvider extends JsonTestClass {
+		public String person;	// uuid
+		public String identifier;
+		
+		public TestProvider(String person, String identifier) {
+			this.person = person;
+			this.identifier = identifier;
+		}
+
+		@Override
+		public String name() {
+			return "provider";
+		}
+		
+	}
+	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");
 		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
@@ -300,7 +321,7 @@ public class TestData {
 		return getId("user", uuid);
 	}
 
-	private static String getId(String object, String uuid) {
+	public static String getId(String object, String uuid) {
 		JsonNode json = RestClient.get(object + "/" + uuid, "id");
 		return json.get("id").asText();
 	}
@@ -345,6 +366,7 @@ public class TestData {
 		public String userUuid;
 		public String userId;
 		public Set<RoleInfo> roles = new HashSet<TestData.RoleInfo>();
+		public String locale;
 
 		@Override
 		public String toString() {
@@ -489,7 +511,7 @@ public class TestData {
 			}
 			i++;
 		}
-		TestUser tu = new TestUser(ui.username, ui.uuid, roleUuids);
+		TestUser tu = new TestUser(ui.username, ui.uuid, roleUuids, ui.locale);
 		ui.userUuid = tu.create();
 		ui.userId = TestData.getUserId(ui.userUuid);
 	}
