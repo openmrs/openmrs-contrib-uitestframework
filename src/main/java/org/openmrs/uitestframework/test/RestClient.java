@@ -99,11 +99,11 @@ public class RestClient {
 	}
 
 	// Note this is not REST. 
-	public static String generatePatientIdentifier() {
+	public static String generatePatientIdentifier(String source) {
 		Client client = newClient();
 		WebTarget target = client.target(getWebAppUrl())
 				.path("/module/idgen/generateIdentifier.form")
-				.queryParam("source", "1")
+				.queryParam("source", source)
 				.queryParam("username", getUsername())
 				.queryParam("password", getPassword());
 		String jsonString = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);

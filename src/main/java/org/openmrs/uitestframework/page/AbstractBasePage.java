@@ -192,7 +192,11 @@ public abstract class AbstractBasePage implements Page {
     }
 
 	public void waitForTextToBePresentInElement(By by, String text) {
-		waiter.until(ExpectedConditions.textToBePresentInElement(by, text));
+		waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
 	}
-	
+
+	public Boolean containsText(String text) {
+		return driver.getPageSource().contains(text);
+	}
+
 }

@@ -441,15 +441,15 @@ public class TestBase {
 		return String.format(query, id);
 	}
 	
-	public PatientInfo createTestPatient(String patientIdentifierTypeName) {
+	public PatientInfo createTestPatient(String patientIdentifierTypeName, String source) {
 		PatientInfo pi = TestData.generateRandomPatient();
 		String uuid = TestData.createPerson(pi);
-		pi.identifier = createPatient(uuid, patientIdentifierTypeName);
+		pi.identifier = createPatient(uuid, patientIdentifierTypeName, source);
 		return pi;
 	}
 
 	public PatientInfo createTestPatient() {
-		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE);
+		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE, "1");
 	}
 	
 	/**
@@ -460,14 +460,14 @@ public class TestBase {
 	 * @param patientIdentifierType The type of Patient Identifier to use
 	 * @return The Patient Identifier for the newly created patient
 	 */
-	public String createPatient(String personUuid, String patientIdentifierType) {
-	    String patientIdentifier = generatePatientIdentifier();
+	public String createPatient(String personUuid, String patientIdentifierType, String source) {
+	    String patientIdentifier = generatePatientIdentifier(source);
 		RestClient.post("patient", new TestPatient(personUuid, patientIdentifier, patientIdentifierType));
 		return patientIdentifier;
 	}
 
-	private String generatePatientIdentifier() {
-	    return RestClient.generatePatientIdentifier();
+	private String generatePatientIdentifier(String source) {
+	    return RestClient.generatePatientIdentifier(source);
     }
 
 	/**
