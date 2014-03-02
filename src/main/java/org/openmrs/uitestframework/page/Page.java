@@ -16,6 +16,8 @@ public interface Page {
 	
 	WebElement findElementById(String id);
 	
+	List<WebElement> findElements(By by);
+	
 	String getText(By by);
 	
 	void setText(By by, String text);
@@ -28,9 +30,13 @@ public interface Page {
 	
 	void hoverOn(By by);
 
+	/**
+	 * Select an item from a drop down list.
+	 * 
+	 * @param by The drop down list.
+	 * @param value The text of the desired item from the list.
+	 */
     void selectFrom(By by, String value);
-
-    List<WebElement> findElements(By by);
 
 	/**
 	 * Return the actual title of the page.
@@ -54,8 +60,29 @@ public interface Page {
 	String expectedUrlPath();
 
 	/**
-	 * Same as setTextToField, but does not send an ENTER key after.
+	 * Same as setText, but does not send an ENTER key after.
 	 */
 	void setTextToFieldNoEnter(By textFieldId, String text);
-
+	
+	/**
+	 * Wait for the given element to be visible. The default wait time is 5 seconds.
+	 * 
+	 * @param by
+	 */
+	void waitForElement(By by);
+	
+	/**
+	 * Wait for text to be present in the given element. The default wait time is 5 seconds.
+	 * 
+	 * @param by
+	 */
+	void waitForTextToBePresentInElement(By by, String text);
+	
+	/**
+	 * Return true if the page contains the given text anywhere on the page.
+	 * 
+	 * @param text
+	 * @return true if the page contains the given text anywhere on the page.
+	 */
+	Boolean containsText(String text);
 }
