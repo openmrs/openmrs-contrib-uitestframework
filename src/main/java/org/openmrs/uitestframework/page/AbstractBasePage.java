@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public abstract class AbstractBasePage implements Page {
 	
 	public final String URL_ROOT;
-	public static final int MAX_WAIT_SECONDS = 5;
+	public static final int MAX_WAIT_SECONDS = 8;
 	
     protected TestProperties properties = TestProperties.instance();
     protected WebDriver driver;
