@@ -223,7 +223,7 @@ public class TestBase {
 		
 		@Override
 		public void failed(Throwable t, Description test) {
-			takeScreenshot(test.getDisplayName());
+			takeScreenshot(test.getDisplayName().replaceAll("[()]", ""));
 		}
 	};
 
