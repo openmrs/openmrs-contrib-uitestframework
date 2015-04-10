@@ -3,6 +3,7 @@ package org.openmrs.uitestframework.test;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_METADATA_HANDLER;
 import static org.junit.Assert.assertEquals;
+import io.github.bonigarcia.wdm.ChromeDriverManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +89,8 @@ public class TestBase {
 		final TestProperties.WebDriverType webDriverType = properties.getWebDriver();
 		switch (webDriverType) {
 			case chrome:
-				driver = setupChromeDriver();
+				ChromeDriverManager.setup();
+				driver = new ChromeDriver();
 				break;
 			case firefox:
 				driver = setupFirefoxDriver();
