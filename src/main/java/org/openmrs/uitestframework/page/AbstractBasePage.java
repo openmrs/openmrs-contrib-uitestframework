@@ -21,10 +21,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * elements, clicking, filling fields. etc.
  */
 public abstract class AbstractBasePage implements Page {
-	
-	public final String URL_ROOT;
-	public static final int MAX_WAIT_SECONDS = 30;
-	
+
+    public final String URL_ROOT;
+    public static final int MAX_WAIT_SECONDS = 30;
+
     protected TestProperties properties = TestProperties.instance();
     protected WebDriver driver;
     private String serverURL;
@@ -41,22 +41,22 @@ public abstract class AbstractBasePage implements Page {
     public void gotoPage(String address) {
         driver.get(serverURL + address);
     }
-    
+
     public void go() {
-    	driver.get(StringUtils.removeEnd(serverURL, URL_ROOT) + expectedUrlPath());
+        driver.get(StringUtils.removeEnd(serverURL, URL_ROOT) + expectedUrlPath());
     }
-    
+
     @Override
     public WebElement findElement(By by) {
-    	waiter.until(ExpectedConditions.presenceOfElementLocated(by));
-    	return driver.findElement(by);
+        waiter.until(ExpectedConditions.presenceOfElementLocated(by));
+        return driver.findElement(by);
     }
 
     @Override
     public WebElement findElementById(String id) {
-    	return findElement(By.id(id));
+        return findElement(By.id(id));
     }
-    
+
     @Override
     public String getText(By by) {
         return findElement(by).getText();
@@ -69,29 +69,29 @@ public abstract class AbstractBasePage implements Page {
 
     @Override
     public void setText(String id, String text) {
-    	setText(findElement(By.id(id)), text);
+        setText(findElement(By.id(id)), text);
     }
-    
+
     @Override
     public void setTextToFieldNoEnter(By by, String text) {
-    	setTextNoEnter(findElement(by), text);
+        setTextNoEnter(findElement(by), text);
     }
-    
+
     @Override
     public void setTextToFieldInsideSpan(String spanId, String text) {
         setText(findTextFieldInsideSpan(spanId), text);
     }
 
     private void setText(WebElement element, String text) {
-    	setTextNoEnter(element, text);
+        setTextNoEnter(element, text);
         element.sendKeys(Keys.RETURN);
     }
 
     private void setTextNoEnter(WebElement element, String text) {
-    	element.clear();
-    	element.sendKeys(text);
+        element.clear();
+        element.sendKeys(text);
     }
-    
+
     @Override
     public void clickOn(By by) {
         findElement(by).click();
@@ -114,89 +114,93 @@ public abstract class AbstractBasePage implements Page {
         return findElementById(spanId).findElement(By.tagName("input"));
     }
 
-	@Override
+    @Override
     public String title() {
-	    return getText(By.tagName("title"));
+        return getText(By.tagName("title"));
     }
-	
-	@Override
-	public String urlPath() {
-	    try {
-	        return new URL(driver.getCurrentUrl()).getPath();
+
+    @Override
+    public String urlPath() {
+        try {
+            return new URL(driver.getCurrentUrl()).getPath();
         }
         catch (MalformedURLException e) {
-	        return null;
+            return null;
         }
     }
 
     @Override
     public List<WebElement> findElements(By by) {
-    	waiter.until(ExpectedConditions.presenceOfElementLocated(by));
+        waiter.until(ExpectedConditions.presenceOfElementLocated(by));
         return driver.findElements(by);
     }
-	
-	/**
-	 * Real pages supply their expected URL path.
-	 * 
-	 * @return The path portion of the url of the page.
-	 */
-	@Override
+
+    /**
+     * Real pages supply their expected URL path.
+     *
+     * @return The path portion of the url of the page.
+     */
+    @Override
     public abstract String expectedUrlPath();
 
-	public void clickOnLinkFromHref(String href) {
-		// We allow use of xpath here because href's tend to be quite stable.
+    public void clickOnLinkFromHref(String href) {
+        // We allow use of xpath here because href's tend to be quite stable.
         clickOn(byFromHref(href));
     }
 
-	public By byFromHref(String href) {
-		return By.xpath("//a[@href='" + href + "']");
-	}
+    public By byFromHref(String href) {
+        return By.xpath("//a[@href='" + href + "']");
+    }
 
-	public void waitForFocusById(final String id) {
-    	waiter.until(new ExpectedCondition<Boolean>() {
-    	      @Override
-    	      public Boolean apply(WebDriver driver) {
-    	        return hasFocus(id);
-    	      }
-    	});
+    public void waitForFocusById(final String id) {
+        waiter.until(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return hasFocus(id);
+            }
+        });
     }
 
     public void waitForFocusByCss(final String tag, final String attr, final String value) {
-    	waiter.until(new ExpectedCondition<Boolean>() {
-    		@Override
-    		public Boolean apply(WebDriver driver) {
-    			return hasFocus(tag, attr, value);
-    		}
-    	});
+        waiter.until(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return hasFocus(tag, attr, value);
+            }
+        });
     }
 
     public void waitForJsVariable(final String varName) {
-    	waiter.until(new ExpectedCondition<Boolean>() {
-    	      @Override
-    	      public Boolean apply(WebDriver driver) {
-    	        return (Boolean) ((JavascriptExecutor)driver).executeScript("return " + varName, new Object[] {});
-    	      }
-    	});
+        waiter.until(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver driver) {
+                return (Boolean) ((JavascriptExecutor)driver).executeScript("return " + varName, new Object[] {});
+            }
+        });
+    }
+
+    public void waitForElementToBeHidden(By by) {
+        waiter.until(ExpectedConditions.invisibilityOfElementLocated(by));
     }
 
     boolean hasFocus(String id) {
         return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('#" + id +  "').is(':focus')", new Object[] {});
     }
-    
+
     boolean hasFocus(String tag, String attr, String value) {
-    	return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
+        return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
     }
 
-	public void waitForElement(By by) {
-    	waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
+    public void waitForElement(By by) {
+        waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
-	public void waitForTextToBePresentInElement(By by, String text) {
-		waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
-	}
+    public void waitForTextToBePresentInElement(By by, String text) {
+        waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
+    }
 
-	public Boolean containsText(String text) {
-		return driver.getPageSource().contains(text);
-	}
+    public Boolean containsText(String text) {
+        return driver.getPageSource().contains(text);
+    }
 
 }
