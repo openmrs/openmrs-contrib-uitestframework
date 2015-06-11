@@ -77,6 +77,8 @@ public class TestBase {
 	protected static IDatabaseTester dbTester;
 	
 	protected static QueryDataSet deleteDataSet;
+
+    protected static QueryDataSet checkDataSet;
 	
 	public static final String DEFAULT_ROLE = "Privilege Level: Full";
 	
@@ -172,6 +174,8 @@ public class TestBase {
 	/**
 	 * Typically invoked from an @After method.
 	 */
+
+
 	public void dbUnitTearDown() throws Exception {
 		dbUnitTearDownStatic(dbUnitTearDownOperation());
 	}
@@ -206,6 +210,13 @@ public class TestBase {
 			deleteDataSet = newQueryDataSet();
 		}
 		return deleteDataSet;
+    }
+
+    protected static QueryDataSet getCheckDataSet() throws Exception {
+        if (checkDataSet == null) {
+            checkDataSet = newQueryDataSet();
+        }
+        return checkDataSet;
     }
 
 	private static QueryDataSet newQueryDataSet() throws Exception {
@@ -336,6 +347,69 @@ public class TestBase {
     public String patientIdFromUrl() {
 		String url = driver.getCurrentUrl();
 		return StringUtils.substringAfter(url, "patientId=");
+    }
+
+    /**
+     * Check if given patient exists
+     *
+     * @param patient The info for the patient to delete.
+     */
+    public void checkIfPatientExists(PatientInfo patient) throws DataSetException, SQLException, Exception {
+        if (patient.id != null) {
+            checkIfPatientExists(patient.id);
+        } else if (patient.uuid != null) {
+            deletePatientUuid(patient.uuid);
+        }
+    }
+
+    /**
+    * Check if patient with given id exists
+    * @param id
+     **/
+    public boolean checkIfPatientExists(String id) throws Exception{
+        QueryDataSet dataSet = getCheckDataSet();
+        dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s) and obs_group_id is not null", id));
+        if(dataSet.getTable("obs").getRowCount() > 0) {
+            return true;
+        }
+
+        dataSet = getCheckDataSet();
+        addSimpleQuery(dataSet, "person", "person_id", id);
+        addSimpleQuery(dataSet, "patient", "patient_id", id);
+        addSimpleQuery(dataSet, "person_name", "person_id", id);
+        addSimpleQuery(dataSet, "person_address", "person_id", id);
+        addSimpleQuery(dataSet, "patient_identifier", "patient_id", id);
+        dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", id));
+
+        if(dataSet.getTable("name_phonetics").getRowCount() > 0) {
+            return true;
+        }
+
+        addSimpleQuery(dataSet, "person_attribute", "person_id", id);
+        addSimpleQuery(dataSet, "visit", "patient_id", id);
+        addSimpleQuery(dataSet, "encounter", "patient_id", id);
+        dataSet.addTable("encounter_provider", formatQuery("select * from encounter_provider where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
+        dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
+        if(dataSet.getTable("encounter_provider").getRowCount() > 0) {
+            return true;
+        }
+
+        if(dataSet.getTable("obs").getRowCount() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if patient with given uuid exists
+     * @param uuid
+     * @return
+     * @throws Exception
+     */
+    public boolean checkIfPatientUuidExists(String uuid) throws Exception {
+        ITable query = getDbTester().getConnection().createQueryTable("person", "select * from person where uuid = \"" + uuid + "\"");
+        Integer id = (Integer) query.getValue(0, "person_id");
+        return checkIfPatientExists(id.toString());
     }
 
     /**
