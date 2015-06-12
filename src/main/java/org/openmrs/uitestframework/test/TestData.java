@@ -313,6 +313,7 @@ public class TestData {
 		return null;
 	}
 
+
 	public static String getPersonId(String uuid) {
 		return getId("person", uuid);
 	}
@@ -485,7 +486,7 @@ public class TestData {
 		person.id = getPersonId(person.uuid);
 		return person.uuid;
 	}
-	
+
 	public static final String BDAY_SEP = "-";
 	private static String makeBirthdate(PersonInfo pi) {
 	    return pi.birthYear + BDAY_SEP + pi.birthMonthIndex + BDAY_SEP + pi.birthDay;
@@ -530,5 +531,19 @@ public class TestData {
 		TestEncounter te = new TestEncounter(ei.type, ei.patient.uuid, ei.datetime);
 		ei.uuid = te.create();
 	}
-	
+
+    /**
+     * Check if patient with given id exists
+     * @param id
+     * @return true if patient exists, false otherwise
+     */
+    public static boolean checkIfPatientExists(String id) {
+        JsonNode json = RestClient.get("patient/"+id);
+        JsonNode results = json.get("results");
+        if(results != null && results.size() > 0) {
+            return true;
+        }
+        return false;
+    }
+
 }
