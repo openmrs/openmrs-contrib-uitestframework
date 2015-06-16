@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.ws.rs.NotFoundException;
 
 public class TestData {
 
@@ -538,12 +539,16 @@ public class TestData {
      * @return true if patient exists, false otherwise
      */
     public static boolean checkIfPatientExists(String id) {
-        JsonNode json = RestClient.get("patient/"+id);
-        JsonNode results = json.get("results");
-        if(results != null && results.size() > 0) {
-            return true;
+        try {
+            JsonNode json = RestClient.get("patient/" + id);
+            JsonNode results = json.get("results");
+            if (results != null && results.size() > 0) {
+                return true;
+            }
+            return false;
+        } catch(NotFoundException e) {
+            return false;
         }
-        return false;
     }
 
 }
