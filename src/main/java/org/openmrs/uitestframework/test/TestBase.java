@@ -3,6 +3,7 @@ package org.openmrs.uitestframework.test;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_METADATA_HANDLER;
 import static org.junit.Assert.assertEquals;
+import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -581,5 +583,15 @@ public class TestBase {
     	assertPage(page);
 		page.login(user.username, user.password);
 	}
+
+    protected void waitForPatientDeletion(String uuid) throws Exception {
+        Long startTime = System.currentTimeMillis();
+        while(checkIfPatientExists(uuid)) {
+            Thread.sleep(200);
+            if(System.currentTimeMillis() - startTime > 30000) {
+                throw new TimeoutException("Patient not deleted in expected time");
+            }
+        }
+    }
 
 }
