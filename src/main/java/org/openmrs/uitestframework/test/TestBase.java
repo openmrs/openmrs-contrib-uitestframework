@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -61,6 +62,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
+import javax.ws.rs.NotFoundException;
 
 /**
  * Superclass for all UI Tests. Contains lots of handy "utilities"
@@ -355,53 +358,14 @@ public class TestBase {
      * Delete the given patient from the various tables that contain
      * portions of a patient's info. 
      * 
-     * @param patient The info for the patient to delete.
+     * @param uuid The uuid of the patient to delete.
      */
-    public void deletePatient(PatientInfo patient) throws DataSetException, SQLException, Exception {
-    	if (patient.id != null) {
-    		deletePatient(patient.id);
-    	} else if (patient.uuid != null) {
-    		deletePatientUuid(patient.uuid);
-    	}
-    }
-    
-    /**
-     * Delete the given patient from the various tables that contain
-     * portions of a patient's info. 
-     * 
-     * @param id The database patient_id column.
-     */
-	public void deletePatient(String id) throws Exception {
-		// See org.openmrs.module.mirebalais.smoke.helper.PatientDatabaseHandler.initializePatientTablesToDelete() for more details.
-		// Also see /mirebalais-smoke-test/src/test/resources/datasets/patients_dataset.xml.hbs
-		
-		// first delete the obs with no group
-		QueryDataSet dataSet = getDeleteDataSet();
-        dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s) and obs_group_id is not null", id));
-        dbUnitTearDown();
+	public void deletePatient(String uuid) throws NotFoundException {
+		RestClient.get("patient/" + uuid);
+	}
 
-		// then delete the rest (including obs with a group)
-		dataSet = getDeleteDataSet();
-		addSimpleQuery(dataSet, "person", "person_id", id);
-		addSimpleQuery(dataSet, "patient", "patient_id", id);
-		addSimpleQuery(dataSet, "person_name", "person_id", id);
-		addSimpleQuery(dataSet, "person_address", "person_id", id);
-		addSimpleQuery(dataSet, "patient_identifier", "patient_id", id);
-		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", id));
-		addSimpleQuery(dataSet, "person_attribute", "person_id", id);
-		addSimpleQuery(dataSet, "visit", "patient_id", id);
-		addSimpleQuery(dataSet, "encounter", "patient_id", id);
-		dataSet.addTable("encounter_provider", formatQuery("select * from encounter_provider where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
-		dataSet.addTable("obs", formatQuery("select * from obs where encounter_id in (select encounter_id from encounter where patient_id = %s)", id));
-		dbUnitTearDown();
-	}
 	
-	public void deletePatientUuid(String uuid) throws DataSetException, SQLException, Exception {
-		ITable query = getDbTester().getConnection().createQueryTable("person", "select * from person where uuid = \"" + uuid + "\"");
-		Integer id = (Integer) query.getValue(0, "person_id");
-		deletePatient(id.toString());
-	}
-	
+
 	/**
 	 * Delete the given user from the various tables that contain
 	 * portions of a user's info. 

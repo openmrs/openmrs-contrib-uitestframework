@@ -24,7 +24,7 @@ public class RestClient {
 	public static JsonNode get(String restPath) {
 		return get(restPath, null);
     }
-	
+
 	// columns is a comma separated list (or null)
 	public static JsonNode get(String restPath, String columns) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
@@ -47,6 +47,34 @@ public class RestClient {
 	        log("error during REST get", e);
 	        return null;
         }
+	}
+
+	public static JsonNode delete(String restPath) {
+		return get(restPath, null);
+	}
+
+	// columns is a comma separated list (or null)
+	public static JsonNode delete(String restPath, String columns) {
+		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
+		if (columns != null) {
+			target = target.queryParam("v", "custom:(" + columns + ")");
+		}
+		String jsonString = target.request().delete(String.class);
+		try {
+			return new ObjectMapper().readValue(jsonString, JsonNode.class);
+		}
+		catch (JsonParseException e) {
+			log("error during REST delete", e);
+			return null;
+		}
+		catch (JsonMappingException e) {
+			log("error during REST delete", e);
+			return null;
+		}
+		catch (IOException e) {
+			log("error during REST delete", e);
+			return null;
+		}
 	}
 
 	public static JsonNode post(String restPath, JsonTestClass object) {
