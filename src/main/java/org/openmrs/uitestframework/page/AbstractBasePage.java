@@ -143,9 +143,9 @@ public abstract class AbstractBasePage implements Page {
     @Override
     public abstract String expectedUrlPath();
 
-    public void clickOnLinkFromHref(String href) {
+    public void clickOnLinkFromHref(String href) throws InterruptedException{
         // We allow use of xpath here because href's tend to be quite stable.
-        clickOn(byFromHref(href));
+        clickWhenVisible(byFromHref(href));
     }
 
     public By byFromHref(String href) {
