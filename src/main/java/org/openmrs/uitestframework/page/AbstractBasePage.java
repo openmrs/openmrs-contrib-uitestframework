@@ -203,4 +203,17 @@ public abstract class AbstractBasePage implements Page {
         return driver.getPageSource().contains(text);
     }
 
+    public void clickWhenVisible(By by) throws InterruptedException {
+        Long startTime = System.currentTimeMillis();
+        while((System.currentTimeMillis() - startTime) < 10000) {
+            try {
+                clickOn(by);
+                break;
+            } catch (Exception e) {
+                Thread.sleep(500);
+            }
+        }
+
+    }
+
 }
