@@ -50,7 +50,7 @@ public class RestClient {
 	}
 
 	public static JsonNode delete(String restPath) {
-		return get(restPath, null);
+		return delete(restPath, null);
 	}
 
 	// columns is a comma separated list (or null)
