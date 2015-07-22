@@ -2,6 +2,7 @@ package org.openmrs.uitestframework.test;
 
 import java.io.IOException;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -47,6 +48,16 @@ public class RestClient {
 	        log("error during REST get", e);
 	        return null;
         }
+	}
+
+	public static void deleteVisitByPatient(String uuid) throws NotFoundException {
+		JsonNode json = RestClient.get("visit?patient=" + uuid);
+		JsonNode results = json.get("results");
+		for (int i = 0; i < results.size(); i++) {
+			JsonNode each = results.get(i);
+			RestClient.delete("visit/" + each.get("uuid"));
+		}
+
 	}
 
 	public static JsonNode delete(String restPath) {
