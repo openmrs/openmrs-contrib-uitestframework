@@ -50,41 +50,19 @@ public class RestClient {
         }
 	}
 
-	public static void deleteVisitByPatient(String uuid) throws NotFoundException {
-		JsonNode json = RestClient.get("visit?patient=" + uuid);
-		JsonNode results = json.get("results");
-		for (int i = 0; i < results.size(); i++) {
-			JsonNode each = results.get(i);
-			RestClient.delete("visit/" + each.get("uuid"));
-		}
-
-	}
-
-	public static JsonNode delete(String restPath) {
-		return delete(restPath, null);
+	public static void delete(String restPath) {
+		delete(restPath, null);
 	}
 
 	// columns is a comma separated list (or null)
-	public static JsonNode delete(String restPath, String columns) {
+	public static void delete(String restPath, String columns) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
 		if (columns != null) {
 			target = target.queryParam("v", "custom:(" + columns + ")");
 		}
 		String jsonString = target.request().delete(String.class);
-		try {
-			return new ObjectMapper().readValue(jsonString, JsonNode.class);
-		}
-		catch (JsonParseException e) {
-			log("error during REST delete", e);
-			return null;
-		}
-		catch (JsonMappingException e) {
-			log("error during REST delete", e);
-			return null;
-		}
-		catch (IOException e) {
-			log("error during REST delete", e);
-			return null;
+		if(!jsonString.isEmpty() ) {
+			throw new RuntimeException(jsonString);
 		}
 	}
 

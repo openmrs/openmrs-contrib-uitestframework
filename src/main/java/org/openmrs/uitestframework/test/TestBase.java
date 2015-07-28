@@ -361,8 +361,6 @@ public class TestBase {
      * @param uuid The uuid of the patient to delete.
      */
 	public void deletePatient(String uuid) throws NotFoundException {
-		//(ws/rest/v1/visit?patient={uuid})
-		RestClient.deleteVisitByPatient(uuid);
 		RestClient.delete("patient/" + uuid);
 	}
 
