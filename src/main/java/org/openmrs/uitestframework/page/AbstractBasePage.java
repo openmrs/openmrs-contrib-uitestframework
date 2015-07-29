@@ -183,6 +183,10 @@ public abstract class AbstractBasePage implements Page {
         waiter.until(ExpectedConditions.invisibilityOfElementLocated(by));
     }
 
+    public void waitForElementToBeEnabled(By by) {
+        waiter.until(ExpectedConditions.elementToBeClickable(by));
+    }
+
     boolean hasFocus(String id) {
         return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('#" + id +  "').is(':focus')", new Object[] {});
     }
