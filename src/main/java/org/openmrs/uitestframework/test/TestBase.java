@@ -9,11 +9,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -35,12 +35,12 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.mysql.MySqlDataTypeFactory;
 import org.dbunit.ext.mysql.MySqlMetadataHandler;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -62,90 +62,127 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
-import javax.ws.rs.NotFoundException;
+import com.saucelabs.common.SauceOnDemandAuthentication;
+import com.saucelabs.common.SauceOnDemandSessionIdProvider;
+import com.saucelabs.junit.SauceOnDemandTestWatcher;
 
 /**
- * Superclass for all UI Tests. Contains lots of handy "utilities"
- * needed to setup and tear down tests as well as handy methods
- * needed during tests, such as:
- *  - initialize Selenium WebDriver
- *  - create (and delete) test patient, @see {@link #createTestPatient()}
- *  - @see {@link #currentPage()}
- *  - @see {@link #assertPage(Page)}
- *  - @see {@link #pageContent()}
+ * Superclass for all UI Tests. Contains lots of handy "utilities" needed to setup and tear down
+ * tests as well as handy methods needed during tests, such as: - initialize Selenium WebDriver -
+ * create (and delete) test patient, @see {@link #createTestPatient()} - @see {@link #currentPage()}
+ * - @see {@link #assertPage(Page)} - @see {@link #pageContent()}
  */
-public class TestBase {
+public class TestBase implements SauceOnDemandSessionIdProvider {
 	
-	protected static WebDriver driver;
+	public String sessionId;
+	
+	public SauceOnDemandAuthentication sauceLabsAuthentication;
+	
+	@Rule
+	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
+	
+	protected LoginPage loginPage;
+	
+	public TestBase() {
+		String sauceLabsUsername = System.getProperty("SAUCELABS_USERNAME");
+		String sauceLabsAccessKey = System.getProperty("SAUCELABS_ACCESSKEY");
+		
+		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
+			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
+			sauceLabsResultReportingTestWatcher = new SauceOnDemandTestWatcher(this, sauceLabsAuthentication);
+		}
+	}
+	
+	@Override
+	public String getSessionId() {
+		return sessionId;
+	}
+	
+	protected WebDriver driver;
 	
 	protected static IDatabaseTester dbTester;
 	
 	protected static QueryDataSet deleteDataSet;
-
-    protected static QueryDataSet checkDataSet;
+	
+	protected static QueryDataSet checkDataSet;
 	
 	public static final String DEFAULT_ROLE = "Privilege Level: Full";
 	
-	protected LoginPage loginPage;
-
-	@BeforeClass
-	public static void startWebDriver() {
-		final TestProperties properties = TestProperties.instance();
-		final TestProperties.WebDriverType webDriverType = properties.getWebDriver();
-		switch (webDriverType) {
-			case chrome:
-				driver = setupChromeDriver();
-				break;
-			case firefox:
-				driver = setupFirefoxDriver();
-				break;
-			default:
-				// shrug, choose chrome as default
-				driver = setupChromeDriver();
-				break;
+	@Before
+	public void startWebDriver() throws Exception {
+		if (sauceLabsAuthentication != null) {
+			DesiredCapabilities capabilities = new DesiredCapabilities();
+			
+			capabilities.setCapability(CapabilityType.BROWSER_NAME, "chrome");
+			capabilities.setCapability(CapabilityType.VERSION, "41");
+			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
+			
+			capabilities.setCapability("name", testName.getMethodName());
+			
+			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
+			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
+			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
+			
+		} else {
+			final TestProperties properties = TestProperties.instance();
+			final TestProperties.WebDriverType webDriverType = properties.getWebDriver();
+			switch (webDriverType) {
+				case chrome:
+					driver = setupChromeDriver();
+					break;
+				case firefox:
+					driver = setupFirefoxDriver();
+					break;
+				default:
+					// shrug, choose chrome as default
+					driver = setupChromeDriver();
+					break;
+			}
+			driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
 		}
-		driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
-		goToLoginPage(); // TODO is this right? do we always want to go to the start page?
+		
+		goToLoginPage();
 	}
 	
-	@AfterClass
-	public static void stopWebDriver() {
+	@After
+	public void stopWebDribver() {
 		driver.quit();
 	}
 	
-	@Before
-	public void initLoginPage() {
-		loginPage = new LoginPage(driver);
+	public void login() {
+		loginPage = goToLoginPage();
+		loginPage.loginAsAdmin();
 	}
 	
-    public void login() {
-    	assertPage(loginPage);
-    	loginPage.loginAsAdmin();
-    }
-
-    public static IDatabaseTester getDbTester() throws Exception {
-    	if (dbTester == null) {
-    		initDatabaseConnection();
-    	}
-    	return dbTester;
-    }
-
+	public static IDatabaseTester getDbTester() throws Exception {
+		if (dbTester == null) {
+			initDatabaseConnection();
+		}
+		return dbTester;
+	}
+	
 	private static void initDatabaseConnection() throws Exception {
 		final TestProperties properties = TestProperties.instance();
-		dbTester = new JdbcDatabaseTester(properties.getDatabaseDriverclass(), properties.getDatabaseConnectionUrl(),
-		        properties.getDatabaseUsername(), properties.getDatabasePassword(), properties.getDatabaseSchema()) {
+		dbTester = new JdbcDatabaseTester(
+		                                  properties.getDatabaseDriverclass(), properties.getDatabaseConnectionUrl(),
+		                                  properties.getDatabaseUsername(), properties.getDatabasePassword(), properties
+		                                          .getDatabaseSchema()) {
+			
 			// A bit of an ugly hack here, due to the fact that DbUnit is really intended for junit3
 			// but we're using it in junit4. When you use it with junit3, the getConnection method
 			// takes care of the config.setProperty calls for you. (see org.dbunit.DBTestCase.getConnection()
 			// and org.dbunit.ext.mysql.MySqlConnection.MySqlConnection(Connection, String).
 			@Override
 			public IDatabaseConnection getConnection() throws Exception {
-			    IDatabaseConnection conn = super.getConnection();
-			    DatabaseConfig config = conn.getConfig();
-			    config.setProperty(PROPERTY_DATATYPE_FACTORY, new MySqlDataTypeFactory());
-			    config.setProperty(PROPERTY_METADATA_HANDLER, new MySqlMetadataHandler());
-			    return conn;
+				IDatabaseConnection conn = super.getConnection();
+				DatabaseConfig config = conn.getConfig();
+				config.setProperty(PROPERTY_DATATYPE_FACTORY, new MySqlDataTypeFactory());
+				config.setProperty(PROPERTY_METADATA_HANDLER, new MySqlMetadataHandler());
+				return conn;
 			}
 		};
 	}
@@ -167,20 +204,19 @@ public class TestBase {
 		String inputXml = "<dataset></dataset>";
 		IDataSet dataset = new FlatXmlDataSetBuilder().build(new StringReader(inputXml));
 		return dataset;
-    }
-
+	}
+	
 	/**
 	 * Override to change how DbUnit operates.
 	 */
 	protected DatabaseOperation dbUnitSetUpOperation() {
-	    return DatabaseOperation.REFRESH;
-    }
-
+		return DatabaseOperation.REFRESH;
+	}
+	
 	/**
 	 * Typically invoked from an @After method.
 	 */
-
-
+	
 	public void dbUnitTearDown() throws Exception {
 		dbUnitTearDownStatic(dbUnitTearDownOperation());
 	}
@@ -197,7 +233,7 @@ public class TestBase {
 			return;
 		}
 		getDbTester().setDataSet(deleteDataSet);
-//System.out.println("teardown dataset: " + Arrays.asList(getDbTester().getDataSet().getTableNames()));
+		//System.out.println("teardown dataset: " + Arrays.asList(getDbTester().getDataSet().getTableNames()));
 		getDbTester().setTearDownOperation(op);
 		getDbTester().onTearDown();
 		deleteDataSet = null;
@@ -207,29 +243,31 @@ public class TestBase {
 	 * Override to change how DbUnit operates.
 	 */
 	protected DatabaseOperation dbUnitTearDownOperation() {
-	    return DatabaseOperation.DELETE;
-    }
-
+		return DatabaseOperation.DELETE;
+	}
+	
 	protected static QueryDataSet getDeleteDataSet() throws Exception {
 		if (deleteDataSet == null) {
 			deleteDataSet = newQueryDataSet();
 		}
 		return deleteDataSet;
-    }
-
-    protected static QueryDataSet getCheckDataSet() throws Exception {
-        if (checkDataSet == null) {
-            checkDataSet = newQueryDataSet();
-        }
-        return checkDataSet;
-    }
-
+	}
+	
+	protected static QueryDataSet getCheckDataSet() throws Exception {
+		if (checkDataSet == null) {
+			checkDataSet = newQueryDataSet();
+		}
+		return checkDataSet;
+	}
+	
 	private static QueryDataSet newQueryDataSet() throws Exception {
 		return new QueryDataSet(getDbTester().getConnection());
 	}
-
-	public static void goToLoginPage() {
-		currentPage().gotoPage(LoginPage.LOGIN_PATH);
+	
+	public LoginPage goToLoginPage() {
+		loginPage = new LoginPage(driver);
+		loginPage.gotoPage(LoginPage.LOGIN_PATH);
+		return loginPage;
 	}
 	
 	// This takes a screen (well, browser) snapshot whenever there's a failure
@@ -242,14 +280,13 @@ public class TestBase {
 			takeScreenshot(test.getDisplayName().replaceAll("[()]", ""));
 		}
 	};
-
 	
-	static WebDriver setupFirefoxDriver() {
+	WebDriver setupFirefoxDriver() {
 		driver = new FirefoxDriver();
 		return driver;
 	}
 	
-	static WebDriver setupChromeDriver() {
+	WebDriver setupChromeDriver() {
 		URL chromedriverExecutable = null;
 		ClassLoader classLoader = TestBase.class.getClassLoader();
 		
@@ -313,16 +350,16 @@ public class TestBase {
 	 * 
 	 * @return a Page
 	 */
-	public static Page currentPage() {
+	public Page currentPage() {
 		return new GenericPage(driver);
 	}
 	
 	/**
-	 * Assert we're on the expected page. 
+	 * Assert we're on the expected page.
 	 * 
 	 * @param expected page
 	 */
-	public static void assertPage(Page expected) {
+	public void assertPage(Page expected) {
 		assertEquals(expected.expectedUrlPath(), currentPage().urlPath());
 	}
 	
@@ -338,6 +375,9 @@ public class TestBase {
 	@ClassRule
 	public static TestClassName TestClassName = new TestClassName();
 	
+	@Rule
+	public TestName testName = new TestName();
+	
 	static class TestClassName implements TestRule {
 		
 		public String name;
@@ -349,26 +389,22 @@ public class TestBase {
 		}
 	}
 	
-    public String patientIdFromUrl() {
+	public String patientIdFromUrl() {
 		String url = driver.getCurrentUrl();
 		return StringUtils.substringAfter(url, "patientId=");
-    }
-
-    /**
-     * Delete the given patient from the various tables that contain
-     * portions of a patient's info. 
-     * 
-     * @param uuid The uuid of the patient to delete.
-     */
+	}
+	
+	/**
+	 * Delete the given patient from the various tables that contain portions of a patient's info.
+	 * 
+	 * @param uuid The uuid of the patient to delete.
+	 */
 	public void deletePatient(String uuid) throws NotFoundException {
 		RestClient.delete("patient/" + uuid);
 	}
-
-
-
+	
 	/**
-	 * Delete the given user from the various tables that contain
-	 * portions of a user's info. 
+	 * Delete the given user from the various tables that contain portions of a user's info.
 	 * 
 	 * @param user The database user info, especially the user_id and person_id.
 	 */
@@ -381,7 +417,11 @@ public class TestBase {
 		addSimpleQuery(dataSet, "provider", "person_id", personid);
 		addSimpleQuery(dataSet, "person_name", "person_id", personid);
 		addSimpleQuery(dataSet, "person_address", "person_id", personid);
-		dataSet.addTable("name_phonetics", formatQuery("select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)", personid));
+		dataSet.addTable(
+		    "name_phonetics",
+		    formatQuery(
+		        "select * from name_phonetics where person_name_id in (select person_name_id from person_name where person_id = %s)",
+		        personid));
 		addSimpleQuery(dataSet, "person_attribute", "person_id", personid);
 		addSimpleQuery(dataSet, "users", "user_id", userid);
 		addSimpleQuery(dataSet, "user_role", "user_id", userid);
@@ -390,13 +430,12 @@ public class TestBase {
 	}
 	
 	/**
-	 * Delete the given role from the role table, if it was created
-	 * by this framework.  
+	 * Delete the given role from the role table, if it was created by this framework.
 	 * 
 	 * @param user The database role info.
 	 */
 	public static void deleteRole(RoleInfo role) throws Exception {
-		if (! role.created) {
+		if (!role.created) {
 			return;
 		}
 		QueryDataSet dataSet = getDeleteDataSet();
@@ -404,9 +443,10 @@ public class TestBase {
 		dbUnitTearDownStatic();
 	}
 	
-	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id) throws AmbiguousTableNameException {
+	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id)
+	        throws AmbiguousTableNameException {
 		String query = formatQuery(simpleQuery(tableName, columnName), id);
-//System.out.println("addSimpleQuery: " + tableName + " " + query);		
+		//System.out.println("addSimpleQuery: " + tableName + " " + query);		
 		dataSet.addTable(tableName, query);
 	}
 	
@@ -424,29 +464,29 @@ public class TestBase {
 		pi.identifier = createPatient(uuid, patientIdentifierTypeName, source);
 		return pi;
 	}
-
+	
 	public PatientInfo createTestPatient() {
 		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE, "1");
 	}
 	
 	/**
-	 * Create a Patient in the database and return its Patient Identifier.
-	 * The Patient Identifier is obtained from the database.
+	 * Create a Patient in the database and return its Patient Identifier. The Patient Identifier is
+	 * obtained from the database.
 	 * 
-	 * @param personUuid The person 
+	 * @param personUuid The person
 	 * @param patientIdentifierType The type of Patient Identifier to use
 	 * @return The Patient Identifier for the newly created patient
 	 */
 	public String createPatient(String personUuid, String patientIdentifierType, String source) {
-	    String patientIdentifier = generatePatientIdentifier(source);
+		String patientIdentifier = generatePatientIdentifier(source);
 		RestClient.post("patient", new TestPatient(personUuid, patientIdentifier, patientIdentifierType));
 		return patientIdentifier;
 	}
-
+	
 	private String generatePatientIdentifier(String source) {
-	    return RestClient.generatePatientIdentifier(source);
-    }
-
+		return RestClient.generatePatientIdentifier(source);
+	}
+	
 	/**
 	 * Returns the entire text of the "content" part of the current page
 	 * 
@@ -458,13 +498,13 @@ public class TestBase {
 	
 	public EncounterInfo createTestEncounter(String encounterType, PatientInfo patient) {
 		EncounterInfo ei = new EncounterInfo();
-		ei.datetime = "2012-01-04";	// arbitrary
+		ei.datetime = "2012-01-04"; // arbitrary
 		ei.type = TestData.getEncounterTypeUuid(encounterType);
 		ei.patient = patient;
-		TestData.createEncounter(ei);	// sets the uuid
+		TestData.createEncounter(ei); // sets the uuid
 		return ei;
 	}
-
+	
 	/**
 	 * Create a User in the database with the given Role and return its info.
 	 */
@@ -477,16 +517,18 @@ public class TestBase {
 		TestData.createUser(ui);
 		return ui;
 	}
-
+	
 	/**
-	 * Create a User and Provider in the database with the given role and provider-role and return its info.
+	 * Create a User and Provider in the database with the given role and provider-role and return
+	 * its info.
 	 */
 	public static UserInfo createUser(String username, RoleInfo role, String providerRole) {
 		return createUser(username, role, providerRole, null);
 	}
-
+	
 	/**
-	 * Create a User and Provider in the database with the given role and provider-role and return its info.
+	 * Create a User and Provider in the database with the given role and provider-role and return
+	 * its info.
 	 */
 	public static UserInfo createUser(String username, RoleInfo role, String providerRole, String locale) {
 		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());
@@ -503,31 +545,30 @@ public class TestBase {
 			// This is the only place where we use DbUnit/JDBC directly during test setup, everywhere
 			// else we use REST.
 			String providerId = TestData.getId("provider", providerUuid);
-			String xmlds = "<dataset>"
-					+ "<provider "
-						+ "provider_id='" + providerId
-						+ "' uuid='" + providerUuid
-						+ "' provider_role_id='" + getProviderRoleId(providerRole) + "'/>"
-					+ "</dataset>";
+			String xmlds = "<dataset>" + "<provider " + "provider_id='" + providerId + "' uuid='" + providerUuid
+			        + "' provider_role_id='" + getProviderRoleId(providerRole) + "'/>" + "</dataset>";
 			FlatXmlDataSet ds = new FlatXmlDataSetBuilder().build(new StringReader(xmlds));
 			getDbTester().setDataSet(ds);
 			getDbTester().setSetUpOperation(DatabaseOperation.UPDATE);
 			getDbTester().onSetup();
-		} catch (DataSetException e) {
+		}
+		catch (DataSetException e) {
 			e.printStackTrace();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 		return ui;
 	}
 	
 	// Part of the above hack to workaround lack of REST support for provider role.
-    private static Integer getProviderRoleId(String providerRoleName) throws Exception {
-        QueryDataSet ds = newQueryDataSet();
-        ds.addTable("providermanagement_provider_role", "select * from providermanagement_provider_role where name = '" + providerRoleName + "'");
+	private static Integer getProviderRoleId(String providerRoleName) throws Exception {
+		QueryDataSet ds = newQueryDataSet();
+		ds.addTable("providermanagement_provider_role", "select * from providermanagement_provider_role where name = '"
+		        + providerRoleName + "'");
 		ITable providerRole = ds.getTable("providermanagement_provider_role");
-        return  (Integer) providerRole.getValue(0, "provider_role_id");
-    }
+		return (Integer) providerRole.getValue(0, "provider_role_id");
+	}
 	
 	public static RoleInfo findOrCreateRole(String name) {
 		RoleInfo ri = new RoleInfo(name);
@@ -542,20 +583,20 @@ public class TestBase {
 		return ri;
 	}
 	
-	public static void login(UserInfo user) {
+	public void login(UserInfo user) {
 		LoginPage page = new LoginPage(driver);
-    	assertPage(page);
+		assertPage(page);
 		page.login(user.username, user.password);
 	}
-
-    protected void waitForPatientDeletion(String uuid) throws Exception {
-        Long startTime = System.currentTimeMillis();
-        while(checkIfPatientExists(uuid)) {
-            Thread.sleep(200);
-            if(System.currentTimeMillis() - startTime > 30000) {
-                throw new TimeoutException("Patient not deleted in expected time");
-            }
-        }
-    }
-
+	
+	protected void waitForPatientDeletion(String uuid) throws Exception {
+		Long startTime = System.currentTimeMillis();
+		while (checkIfPatientExists(uuid)) {
+			Thread.sleep(200);
+			if (System.currentTimeMillis() - startTime > 30000) {
+				throw new TimeoutException("Patient not deleted in expected time");
+			}
+		}
+	}
+	
 }
