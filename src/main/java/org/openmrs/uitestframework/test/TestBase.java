@@ -119,7 +119,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 			
 			capabilities.setCapability(CapabilityType.BROWSER_NAME, "chrome");
-			capabilities.setCapability(CapabilityType.VERSION, "41");
+			capabilities.setCapability(CapabilityType.VERSION, "45");
 			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
 			
 			capabilities.setCapability("name", testName.getMethodName());
