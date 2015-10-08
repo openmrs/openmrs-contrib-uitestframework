@@ -114,7 +114,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	
 	@Before
 	public void startWebDriver() throws Exception {
-		if (sauceLabsAuthentication != null) {
+		if (isRunningOnSauceLabs()) {
 			System.out.println("Running on SauceLabs...");
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 			
@@ -239,6 +239,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		getDbTester().setTearDownOperation(op);
 		getDbTester().onTearDown();
 		deleteDataSet = null;
+	}
+	
+	private boolean isRunningOnSauceLabs() {
+		return sauceLabsAuthentication != null;
 	}
 	
 	/**
@@ -366,11 +370,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 	
 	public void takeScreenshot(String filename) {
-		File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-		try {
-			FileUtils.copyFile(tempFile, new File("target/screenshots/" + filename + ".png"));
+		if (!isRunningOnSauceLabs()) {
+			File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+			try {
+				FileUtils.copyFile(tempFile, new File("target/screenshots/" + filename + ".png"));
+			}
+			catch (IOException e) {}
 		}
-		catch (IOException e) {}
 	}
 	
 	// This junit cleverness picks up the name of the test class, to be used in the chromedriver log file name.
