@@ -31,9 +31,9 @@ public class LoginPage extends AbstractBasePage {
 	}
 	
 	public void login(String user, String password, int location) {
+		driver.findElements(LOCATIONS).get(location).click();
 		setTextToFieldNoEnter(USERNAME, user);
 		setTextToFieldNoEnter(PASSWORD, password);
-		driver.findElements(LOCATIONS).get(location).click();
 		clickOn(LOGIN);
 		findElement(byFromHref(URL_ROOT + LOGOUT_PATH));	// this waits until the Logoff link is present
 	}
