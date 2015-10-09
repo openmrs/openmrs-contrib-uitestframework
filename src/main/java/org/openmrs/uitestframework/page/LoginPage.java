@@ -1,6 +1,7 @@
 package org.openmrs.uitestframework.page;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 public class LoginPage extends AbstractBasePage {
@@ -31,7 +32,13 @@ public class LoginPage extends AbstractBasePage {
 	}
 	
 	public void login(String user, String password, int location) {
-		waitForPageToBeReady(false);
+		try {
+			waitForPageToBeReady(false);
+		} catch (TimeoutException e) {
+			//Try loading the page again
+			goToPage(expectedUrlPath());
+			waitForPageToBeReady(false);
+		}
 		
 		setTextToFieldNoEnter(USERNAME, user);
 		setTextToFieldNoEnter(PASSWORD, password);
