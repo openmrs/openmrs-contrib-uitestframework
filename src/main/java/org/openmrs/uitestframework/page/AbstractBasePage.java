@@ -174,7 +174,7 @@ public abstract class AbstractBasePage implements Page {
         waiter.until(new ExpectedCondition<Boolean>() {
             @Override
             public Boolean apply(WebDriver driver) {
-                return (Boolean) ((JavascriptExecutor)driver).executeScript("return " + varName, new Object[] {});
+                return ((JavascriptExecutor)driver).executeScript("return (typeof " + varName + "  !== 'undefined') ? " + varName + " : null") != null;
             }
         });
     }
