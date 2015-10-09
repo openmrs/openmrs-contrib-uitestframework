@@ -228,7 +228,7 @@ public abstract class AbstractBasePage implements Page {
 	            	if (domOnly) {
 	            		return domReady;
 	            	}
-	            	boolean pageReady = Boolean.TRUE.equals(((JavascriptExecutor)driver).executeScript("return pageReady"));
+	            	boolean pageReady = Boolean.TRUE.equals(((JavascriptExecutor)driver).executeScript("return (typeof pageReady !== 'undefined') ? pageReady : null"));
 	                return domReady && pageReady;
 	            }
 	        };
