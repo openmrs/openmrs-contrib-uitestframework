@@ -16,6 +16,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.FinalizablePhantomReference;
+
 /**
  * A superclass for "real" pages. Has lots of handy methods for accessing
  * elements, clicking, filling fields. etc.
@@ -38,7 +40,7 @@ public abstract class AbstractBasePage implements Page {
     }
 
     @Override
-    public void gotoPage(String address) {
+    public void goToPage(String address) {
         driver.get(serverURL + address);
     }
 
@@ -219,5 +221,20 @@ public abstract class AbstractBasePage implements Page {
         }
 
     }
+    
+    @Override
+    public void waitForPageToBeReady(final boolean domOnly) {
+	    ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver driver) {
+	            	boolean domReady = ((JavascriptExecutor)driver).executeScript("return document.readyState").equals("complete");
+	            	if (domOnly) {
+	            		return domReady;
+	            	}
+	            	boolean pageReady = ((JavascriptExecutor)driver).executeScript("return pageReady").equals("true");
+	                return domReady && pageReady;
+	            }
+	        };
+	    waiter.until(pageReady);
+	}
 
 }

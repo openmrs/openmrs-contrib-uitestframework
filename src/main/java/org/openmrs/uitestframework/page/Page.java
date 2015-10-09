@@ -3,14 +3,17 @@ package org.openmrs.uitestframework.page;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 /**
  * A web page.
  */
 public interface Page {
 
-	void gotoPage(String address);
+	void goToPage(String address);
 
 	WebElement findElement(By by);
 	
@@ -85,4 +88,6 @@ public interface Page {
 	 * @return true if the page contains the given text anywhere on the page.
 	 */
 	Boolean containsText(String text);
+
+	void waitForPageToBeReady(boolean domOnly);
 }

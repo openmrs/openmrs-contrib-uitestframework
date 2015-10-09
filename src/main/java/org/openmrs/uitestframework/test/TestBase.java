@@ -56,6 +56,7 @@ import org.openmrs.uitestframework.test.TestData.TestPatient;
 import org.openmrs.uitestframework.test.TestData.TestProvider;
 import org.openmrs.uitestframework.test.TestData.UserInfo;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -65,6 +66,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.saucelabs.common.SauceOnDemandAuthentication;
 import com.saucelabs.common.SauceOnDemandSessionIdProvider;
@@ -278,7 +281,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	
 	public LoginPage goToLoginPage() {
 		loginPage = new LoginPage(driver);
-		loginPage.gotoPage(LoginPage.LOGIN_PATH);
+		loginPage.goToPage(LoginPage.LOGIN_PATH);
 		return loginPage;
 	}
 	
@@ -351,7 +354,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			e.printStackTrace();
 		}
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-"
-		        + testClassName.name + ".log");
+		        + testClassName.className + ".log");
 		driver = new ChromeDriver();
 		return driver;
 	}
@@ -387,16 +390,16 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	
 	static class TestClassName implements TestRule {
 		
-		private String name;
+		private String className;
 		
 		@Override
 		public Statement apply(Statement statement, Description description) {
-			name = description.getTestClass().getSimpleName();
+			className = description.getTestClass().getSimpleName();
 			return statement;
 		}
 		
         public String getClassName() {
-	        return name;
+	        return className;
         }
 	}
 	
