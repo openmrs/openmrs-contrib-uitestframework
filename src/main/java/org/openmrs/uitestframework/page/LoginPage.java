@@ -36,7 +36,7 @@ public class LoginPage extends AbstractBasePage {
 			waitForPageToBeReady(false);
 		} catch (TimeoutException e) {
 			//Try loading the page again
-			goToPage(expectedUrlPath());
+			goToPage(LOGIN_PATH);
 			waitForPageToBeReady(false);
 		}
 		
