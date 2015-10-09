@@ -224,11 +224,11 @@ public abstract class AbstractBasePage implements Page {
     public void waitForPageToBeReady(final boolean domOnly) {
 	    ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 	            public Boolean apply(WebDriver driver) {
-	            	boolean domReady = ((JavascriptExecutor)driver).executeScript("return document.readyState").equals("complete");
+	            	boolean domReady = "complete".equals(((JavascriptExecutor)driver).executeScript("return document.readyState"));
 	            	if (domOnly) {
 	            		return domReady;
 	            	}
-	            	boolean pageReady = ((JavascriptExecutor)driver).executeScript("return pageReady").equals(true);
+	            	boolean pageReady = Boolean.TRUE.equals(((JavascriptExecutor)driver).executeScript("return pageReady"));
 	                return domReady && pageReady;
 	            }
 	        };
