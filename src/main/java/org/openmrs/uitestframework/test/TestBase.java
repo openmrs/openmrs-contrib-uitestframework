@@ -85,6 +85,12 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	@Rule
 	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
 	
+	@ClassRule
+	public static TestClassName testClassName = new TestClassName();
+	
+	@Rule
+	public TestName testName = new TestName();
+	
 	protected LoginPage loginPage;
 	
 	public TestBase() {
@@ -122,7 +128,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			capabilities.setCapability(CapabilityType.VERSION, "45");
 			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
 			
-			capabilities.setCapability("name", testName.getMethodName());
+			capabilities.setCapability("name", testClassName.getClassName() + "." + testName.getMethodName());
 			
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
@@ -345,7 +351,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			e.printStackTrace();
 		}
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-"
-		        + TestClassName.name + ".log");
+		        + testClassName.name + ".log");
 		driver = new ChromeDriver();
 		return driver;
 	}
@@ -379,22 +385,19 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 	}
 	
-	// This junit cleverness picks up the name of the test class, to be used in the chromedriver log file name.
-	@ClassRule
-	public static TestClassName TestClassName = new TestClassName();
-	
-	@Rule
-	public TestName testName = new TestName();
-	
 	static class TestClassName implements TestRule {
 		
-		public String name;
+		private String name;
 		
 		@Override
 		public Statement apply(Statement statement, Description description) {
 			name = description.getTestClass().getSimpleName();
 			return statement;
 		}
+		
+        public String getClassName() {
+	        return name;
+        }
 	}
 	
 	public String patientIdFromUrl() {
