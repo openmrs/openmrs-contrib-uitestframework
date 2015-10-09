@@ -7,7 +7,7 @@ public class LoginPage extends AbstractBasePage {
 	
 	static final By USERNAME = By.id("username");
 	static final By PASSWORD = By.id("password");
-	static final By LOGIN = By.id("login-button");
+	static final By LOGIN = By.id("loginButton");
 	static final By LOCATIONS = By.cssSelector("#sessionLocation li");
 	public static final String LOGIN_PATH = "/login.htm";
 	static final String LOGOUT_PATH = "/logout";
