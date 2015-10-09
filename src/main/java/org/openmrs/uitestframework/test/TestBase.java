@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
@@ -56,7 +55,6 @@ import org.openmrs.uitestframework.test.TestData.TestPatient;
 import org.openmrs.uitestframework.test.TestData.TestProvider;
 import org.openmrs.uitestframework.test.TestData.UserInfo;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -66,8 +64,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.saucelabs.common.SauceOnDemandAuthentication;
 import com.saucelabs.common.SauceOnDemandSessionIdProvider;
@@ -153,7 +149,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 					driver = setupChromeDriver();
 					break;
 			}
-			driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
 		}
 		
 		goToLoginPage();
