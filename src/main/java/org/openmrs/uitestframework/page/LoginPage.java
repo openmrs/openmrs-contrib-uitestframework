@@ -31,11 +31,12 @@ public class LoginPage extends AbstractBasePage {
 	}
 	
 	public void login(String user, String password, int location) {
-		driver.findElements(LOCATIONS).get(location).click();
+		findElement(LOGIN); //wait until page fully loaded and scripts executed
 		setTextToFieldNoEnter(USERNAME, user);
 		setTextToFieldNoEnter(PASSWORD, password);
+		driver.findElements(LOCATIONS).get(location).click();
 		clickOn(LOGIN);
-		findElement(byFromHref(URL_ROOT + LOGOUT_PATH));	// this waits until the Logoff link is present
+		findElement(byFromHref(URL_ROOT + LOGOUT_PATH)); // this waits until the log off link is present
 	}
 	
 	public void login(String user, String password) {
