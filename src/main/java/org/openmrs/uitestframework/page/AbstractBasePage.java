@@ -48,7 +48,7 @@ public abstract class AbstractBasePage implements Page {
 
     @Override
     public WebElement findElement(By by) {
-        waiter.until(ExpectedConditions.presenceOfElementLocated(by));
+        waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
         return driver.findElement(by);
     }
 
