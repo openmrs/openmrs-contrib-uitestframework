@@ -3,7 +3,7 @@
 
 	<groupId>org.openmrs.contrib</groupId>
 	<artifactId>uitestframework</artifactId>
-	<version>1.6-SNAPSHOT</version>
+	<version>1.6</version>
 	<packaging>jar</packaging>
 	<name>UI Test Framework</name>
 	<description>a framework for writing/running UI tests</description>
@@ -18,7 +18,7 @@
 		<connection>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</connection>
 		<developerConnection>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</developerConnection>
 		<url>scm:git:git@github.com:openmrs/openmrs-contrib-uitestframework.git</url>
-		<tag>HEAD</tag>
+		<tag>1.6</tag>
 	</scm>
 
 	<dependencies>
