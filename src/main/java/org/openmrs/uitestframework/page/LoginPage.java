@@ -1,7 +1,11 @@
 package org.openmrs.uitestframework.page;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 public class LoginPage extends AbstractBasePage {
@@ -32,24 +36,31 @@ public class LoginPage extends AbstractBasePage {
 	}
 	
 	public void login(String user, String password, int location) {
-		try {
-			waitForPageToBeReady(false);
-		} catch (TimeoutException e) {
-			//Try loading the page again
-			driver.navigate().refresh();
-			waitForPageToBeReady(false);
-		}
+		waitForPageToBeReady(true);
+
+		postLoginForm(user, password, location);
 		
-		setTextToFieldNoEnter(USERNAME, user);
-		setTextToFieldNoEnter(PASSWORD, password);
-		driver.findElements(LOCATIONS).get(location).click();
-		
-		clickOn(LOGIN);
 		findElement(byFromHref(URL_ROOT + LOGOUT_PATH)); // this waits until the log off link is present
 	}
+
+	private void postLoginForm(String user, String password, int location) {
+	    String postJs;
+		InputStream in = null;
+		try {
+			in = getClass().getResourceAsStream("/post.js");
+	        postJs = IOUtils.toString(in);
+	        in.close();
+        } catch (IOException e) {
+	        throw new RuntimeException(e);
+        } finally {
+        	IOUtils.closeQuietly(in);
+        }
+		
+		((JavascriptExecutor) driver).executeScript(postJs + "post('" + expectedUrlPath() +"', {username: '" + user + "', password: '" + password + "', sessionLocation: " + location + "});");
+    }
 	
 	public void login(String user, String password) {
-		login(user, password, 0);
+		login(user, password, 1);
 	}
 	
 	public void loginAsAdmin() {
