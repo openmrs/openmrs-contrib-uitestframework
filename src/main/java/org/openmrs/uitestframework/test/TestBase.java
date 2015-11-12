@@ -125,6 +125,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			
 			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
 			
+			String revisionNumber = System.getProperty("revisionNumber");
+			if (!StringUtils.isBlank(revisionNumber)) {
+				capabilities.setCapability("build", revisionNumber);
+			}
+			
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
