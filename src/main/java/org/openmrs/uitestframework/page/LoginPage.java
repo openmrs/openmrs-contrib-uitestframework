@@ -56,7 +56,7 @@ public class LoginPage extends AbstractBasePage {
         	IOUtils.closeQuietly(in);
         }
 		
-		((JavascriptExecutor) driver).executeScript(postJs + "post('" + expectedUrlPath() +"', {username: '" + user + "', password: '" + password + "', sessionLocation: " + location + "});");
+		((JavascriptExecutor) driver).executeScript(postJs + " post('" + expectedUrlPath() +"', {username: '" + user + "', password: '" + password + "', sessionLocation: " + location + "});");
     }
 	
 	public void login(String user, String password) {
