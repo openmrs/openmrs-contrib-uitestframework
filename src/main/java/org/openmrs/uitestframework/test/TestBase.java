@@ -85,7 +85,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
 	
 	@ClassRule
-	public static TestClassName testClassName = new TestClassName();
+	public TestClassName testClassName = new TestClassName();
 	
 	@Rule
 	public TestName testName = new TestName();
