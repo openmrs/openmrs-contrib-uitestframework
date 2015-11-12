@@ -37,7 +37,6 @@ import org.dbunit.operation.DatabaseOperation;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
@@ -84,9 +83,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	@Rule
 	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
 	
-	@ClassRule
-	public TestClassName testClassName = new TestClassName();
-	
 	@Rule
 	public TestName testName = new TestName();
 	
@@ -127,7 +123,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			capabilities.setCapability(CapabilityType.VERSION, "45");
 			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
 			
-			capabilities.setCapability("name", testClassName.getClassName() + "." + testName.getMethodName());
+			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
 			
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
@@ -349,7 +345,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			e.printStackTrace();
 		}
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-"
-		        + testClassName.className + ".log");
+		        + getClass().getSimpleName() + ".log");
 		driver = new ChromeDriver();
 		return driver;
 	}
