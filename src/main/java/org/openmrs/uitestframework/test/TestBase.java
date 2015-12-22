@@ -284,6 +284,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	public LoginPage goToLoginPage() {
 		loginPage = new LoginPage(driver);
 		loginPage.goToPage(LoginPage.LOGIN_PATH);
+
+		//refresh, just to be sure all css files and images are loaded properly
+		driver.navigate().refresh();
+		loginPage.waitForPage();
+
 		return loginPage;
 	}
 
