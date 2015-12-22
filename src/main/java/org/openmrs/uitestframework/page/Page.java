@@ -18,238 +18,248 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * A superclass for "real" pages. Has lots of handy methods for accessing
- * elements, clicking, filling fields. etc.
+ * A superclass for "real" pages. Has lots of handy methods for accessing elements, clicking,
+ * filling fields. etc.
  */
 public abstract class Page {
 
-    public final String URL_ROOT;
+	public final String URL_ROOT;
 
-    protected TestProperties properties = TestProperties.instance();
-    protected WebDriver driver;
-    private String serverURL;
-    protected WebDriverWait waiter;
+	protected TestProperties properties = TestProperties.instance();
 
-    private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
-        public Boolean apply(WebDriver driver) {
-        	Object readyState = executeScript("return document.readyState;");
+	protected WebDriver driver;
 
-        	if (hasPageReadyIndicator()) {
-        		return "complete".equals(readyState) && Boolean.TRUE.equals(executeScript("return (typeof pageReady !== 'undefined') ? pageReady : null;"));
-        	} else {
-        		return "complete".equals(readyState);
-        	}
+	private String serverURL;
 
-        }
-    };
+	protected WebDriverWait waiter;
 
-    public Page(WebDriver driver) {
-        this.driver = driver;
-        serverURL = properties.getWebAppUrl();
-        URL_ROOT = "/" + StringUtils.substringAfterLast(serverURL, "/");
-        waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_SECONDS);
-    }
+	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
-    /**
-     * Override to return true, if a page has the 'pageReady' JavaScript variable.
-     *
-     * It is called by {@link #loadPage()} to determine, if it should wait for the variable to return true.
-     *
-     * @return true if the page has pageReady indicator, false by default
-     */
-    public boolean hasPageReadyIndicator() {
-    	return false;
-    }
+		public Boolean apply(WebDriver driver) {
+			Object readyState = executeScript("return document.readyState;");
 
-    public Object executeScript(String script) {
-    	return ((JavascriptExecutor) driver).executeScript(script);
-    }
+			if (hasPageReadyIndicator()) {
+				return "complete".equals(readyState) && Boolean.TRUE
+	                    .equals(executeScript("return (typeof pageReady !== 'undefined') ? pageReady : null;"));
+			} else {
+				return "complete".equals(readyState);
+			}
 
-    public void waitForPage() {
-    	waiter.until(pageReady);
+		}
+	};
+
+	public Page(WebDriver driver) {
+		this.driver = driver;
+		serverURL = properties.getWebAppUrl();
+		URL_ROOT = "/" + StringUtils.substringAfterLast(serverURL, "/");
+		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_SECONDS);
 	}
 
-    public void goToPage(String address) {
-        driver.get(serverURL + address);
+	/**
+	 * Override to return true, if a page has the 'pageReady' JavaScript variable. It is called by
+	 * {@link #loadPage()} to determine, if it should wait for the variable to return true.
+	 *
+	 * @return true if the page has pageReady indicator, false by default
+	 */
+	public boolean hasPageReadyIndicator() {
+		return false;
+	}
 
-        waitForPage();
-    }
+	public Object executeScript(String script) {
+		return ((JavascriptExecutor) driver).executeScript(script);
+	}
 
-    public void go() {
-        driver.get(StringUtils.removeEnd(serverURL, URL_ROOT) + expectedUrlPath());
+	public void waitForPage() {
+		waiter.until(pageReady);
+	}
 
-        waitForPage();
-    }
+	public void goToPage(String address) {
+		driver.get(serverURL + address);
 
-    public WebElement findElement(By by) {
-    	waitForPage();
-        waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
+		waitForPage();
+	}
 
-        return driver.findElement(by);
-    }
+	public void go() {
+		driver.get(StringUtils.removeEnd(serverURL, URL_ROOT) + expectedUrlPath());
 
-    public WebElement findElementById(String id) {
-        return findElement(By.id(id));
-    }
+		waitForPage();
+	}
 
-    public String getText(By by) {
-        return findElement(by).getText();
-    }
+	public WebElement findElement(By by) {
+		waitForPage();
+		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
 
-    public void setText(By by, String text) {
-        setText(findElement(by), text);
-    }
+		return driver.findElement(by);
+	}
 
-    public void setText(String id, String text) {
-        setText(findElement(By.id(id)), text);
-    }
+	public WebElement findElementById(String id) {
+		return findElement(By.id(id));
+	}
 
-    public void setTextToFieldNoEnter(By by, String text) {
-        setTextNoEnter(findElement(by), text);
-    }
+	public String getText(By by) {
+		return findElement(by).getText();
+	}
 
-    public void setTextToFieldInsideSpan(String spanId, String text) {
-        setText(findTextFieldInsideSpan(spanId), text);
-    }
+	public void setText(By by, String text) {
+		setText(findElement(by), text);
+	}
 
-    private void setText(WebElement element, String text) {
-        setTextNoEnter(element, text);
-        element.sendKeys(Keys.RETURN);
-    }
+	public void setText(String id, String text) {
+		setText(findElement(By.id(id)), text);
+	}
 
-    private void setTextNoEnter(WebElement element, String text) {
-        element.clear();
-        element.sendKeys(text);
-    }
+	public void setTextToFieldNoEnter(By by, String text) {
+		setTextNoEnter(findElement(by), text);
+	}
 
-    public void clickOn(By by) {
-        findElement(by).click();
-    }
+	public void setTextToFieldInsideSpan(String spanId, String text) {
+		setText(findTextFieldInsideSpan(spanId), text);
+	}
 
-    public void selectFrom(By by, String value){
-        Select droplist = new Select(findElement(by));
-        droplist.selectByVisibleText(value);
-    }
+	private void setText(WebElement element, String text) {
+		setTextNoEnter(element, text);
+		element.sendKeys(Keys.RETURN);
+	}
 
-    public void hoverOn(By by) {
-        Actions builder = new Actions(driver);
-        Actions hover = builder.moveToElement(findElement(by));
-        hover.perform();
-    }
+	private void setTextNoEnter(WebElement element, String text) {
+		element.clear();
+		element.sendKeys(text);
+	}
 
-    private WebElement findTextFieldInsideSpan(String spanId) {
-        return findElementById(spanId).findElement(By.tagName("input"));
-    }
+	public void clickOn(By by) {
+		findElement(by).click();
+	}
 
-    public String title() {
-        return getText(By.tagName("title"));
-    }
+	public void selectFrom(By by, String value) {
+		Select droplist = new Select(findElement(by));
+		droplist.selectByVisibleText(value);
+	}
 
-    public String urlPath() {
-        try {
-            return new URL(driver.getCurrentUrl()).getPath();
-        }
-        catch (MalformedURLException e) {
-            return null;
-        }
-    }
+	public void hoverOn(By by) {
+		Actions builder = new Actions(driver);
+		Actions hover = builder.moveToElement(findElement(by));
+		hover.perform();
+	}
 
-    public List<WebElement> findElements(By by) {
-    	waitForPage();
-        waiter.until(ExpectedConditions.presenceOfElementLocated(by));
+	private WebElement findTextFieldInsideSpan(String spanId) {
+		return findElementById(spanId).findElement(By.tagName("input"));
+	}
 
-        return driver.findElements(by);
-    }
+	public String title() {
+		return getText(By.tagName("title"));
+	}
 
-    /**
-     * Real pages supply their expected URL path.
-     *
-     * @return The path portion of the url of the page.
-     */
-    public abstract String expectedUrlPath();
+	public String urlPath() {
+		try {
+			return new URL(driver.getCurrentUrl()).getPath();
+		}
+		catch (MalformedURLException e) {
+			return null;
+		}
+	}
 
-    public void clickOnLinkFromHref(String href) throws InterruptedException{
-        // We allow use of xpath here because href's tend to be quite stable.
-        clickOn(byFromHref(href));
-    }
+	public List<WebElement> findElements(By by) {
+		waitForPage();
+		waiter.until(ExpectedConditions.presenceOfElementLocated(by));
 
-    public By byFromHref(String href) {
-        return By.xpath("//a[@href='" + href + "']");
-    }
+		return driver.findElements(by);
+	}
 
-    public void waitForFocusById(final String id) {
-    	waitForPage();
+	/**
+	 * Real pages supply their expected URL path.
+	 *
+	 * @return The path portion of the url of the page.
+	 */
+	public abstract String expectedUrlPath();
 
-        waiter.until(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                return hasFocus(id);
-            }
-        });
-    }
+	public void clickOnLinkFromHref(String href) throws InterruptedException {
+		// We allow use of xpath here because href's tend to be quite stable.
+		clickOn(byFromHref(href));
+	}
 
-    public void waitForFocusByCss(final String tag, final String attr, final String value) {
-    	waitForPage();
+	public By byFromHref(String href) {
+		return By.xpath("//a[@href='" + href + "']");
+	}
 
-        waiter.until(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                return hasFocus(tag, attr, value);
-            }
-        });
-    }
+	public void waitForFocusById(final String id) {
+		waitForPage();
 
-    public void waitForJsVariable(final String varName) {
-    	waitForPage();
+		waiter.until(new ExpectedCondition<Boolean>() {
 
-        waiter.until(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                return ((JavascriptExecutor)driver).executeScript("return (typeof " + varName + "  !== 'undefined') ? " + varName + " : null") != null;
-            }
-        });
-    }
+			@Override
+			public Boolean apply(WebDriver driver) {
+				return hasFocus(id);
+			}
+		});
+	}
 
-    public void waitForElementToBeHidden(By by) {
-    	waitForPage();
+	public void waitForFocusByCss(final String tag, final String attr, final String value) {
+		waitForPage();
 
-        waiter.until(ExpectedConditions.invisibilityOfElementLocated(by));
-    }
+		waiter.until(new ExpectedCondition<Boolean>() {
 
-    public void waitForElementToBeEnabled(By by) {
-    	waitForPage();
+			@Override
+			public Boolean apply(WebDriver driver) {
+				return hasFocus(tag, attr, value);
+			}
+		});
+	}
 
-        waiter.until(ExpectedConditions.elementToBeClickable(by));
-    }
+	public void waitForJsVariable(final String varName) {
+		waitForPage();
 
-    boolean hasFocus(String id) {
-    	waitForPage();
+		waiter.until(new ExpectedCondition<Boolean>() {
 
-        return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('#" + id +  "').is(':focus')", new Object[] {});
-    }
+			@Override
+			public Boolean apply(WebDriver driver) {
+				return ((JavascriptExecutor) driver)
+		                .executeScript("return (typeof " + varName + "  !== 'undefined') ? " + varName + " : null") != null;
+			}
+		});
+	}
 
-    boolean hasFocus(String tag, String attr, String value) {
-    	waitForPage();
+	public void waitForElementToBeHidden(By by) {
+		waitForPage();
 
-        return (Boolean) ((JavascriptExecutor)driver).executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
-    }
+		waiter.until(ExpectedConditions.invisibilityOfElementLocated(by));
+	}
 
-    public void waitForElement(By by) {
-    	waitForPage();
+	public void waitForElementToBeEnabled(By by) {
+		waitForPage();
 
-        waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
-    }
+		waiter.until(ExpectedConditions.elementToBeClickable(by));
+	}
 
-    public void waitForTextToBePresentInElement(By by, String text) {
-    	waitForPage();
+	boolean hasFocus(String id) {
+		waitForPage();
 
-        waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
-    }
+		return (Boolean) ((JavascriptExecutor) driver).executeScript("return jQuery('#" + id + "').is(':focus')",
+		    new Object[] {});
+	}
 
-    public Boolean containsText(String text) {
-    	waitForPage();
+	boolean hasFocus(String tag, String attr, String value) {
+		waitForPage();
 
-        return driver.getPageSource().contains(text);
-    }
+		return (Boolean) ((JavascriptExecutor) driver)
+		        .executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
+	}
+
+	public void waitForElement(By by) {
+		waitForPage();
+
+		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
+	}
+
+	public void waitForTextToBePresentInElement(By by, String text) {
+		waitForPage();
+
+		waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
+	}
+
+	public Boolean containsText(String text) {
+		waitForPage();
+
+		return driver.getPageSource().contains(text);
+	}
 
 }
