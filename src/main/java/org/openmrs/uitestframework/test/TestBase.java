@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
@@ -75,65 +76,68 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  * - @see {@link #assertPage(Page)} - @see {@link #pageContent()}
  */
 public class TestBase implements SauceOnDemandSessionIdProvider {
-	
+
+	public static final int MAX_WAIT_SECONDS = 15;
+
 	public String sessionId;
-	
+
 	public SauceOnDemandAuthentication sauceLabsAuthentication;
-	
+
 	@Rule
 	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
-	
+
 	@Rule
 	public TestName testName = new TestName();
-	
+
 	protected LoginPage loginPage;
-	
+
 	public TestBase() {
 		String sauceLabsUsername = System.getProperty("SAUCELABS_USERNAME");
 		String sauceLabsAccessKey = System.getProperty("SAUCELABS_ACCESSKEY");
-		
+
 		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
 			sauceLabsResultReportingTestWatcher = new SauceOnDemandTestWatcher(this, sauceLabsAuthentication);
 		}
 	}
-	
+
 	@Override
 	public String getSessionId() {
 		return sessionId;
 	}
-	
+
 	protected WebDriver driver;
-	
+
 	protected static IDatabaseTester dbTester;
-	
+
 	protected static QueryDataSet deleteDataSet;
-	
+
 	protected static QueryDataSet checkDataSet;
-	
+
 	public static final String DEFAULT_ROLE = "Privilege Level: Full";
-	
+
 	@Before
 	public void startWebDriver() throws Exception {
 		if (isRunningOnSauceLabs()) {
 			System.out.println("Running on SauceLabs...");
 			DesiredCapabilities capabilities = new DesiredCapabilities();
-			
+
 			capabilities.setCapability(CapabilityType.BROWSER_NAME, "firefox");
 			capabilities.setCapability(CapabilityType.VERSION, "42.0");
 			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
-			
+
 			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
-			
+
 			String buildNumber = System.getProperty("buildNumber");
 			if (!StringUtils.isBlank(buildNumber)) {
 				capabilities.setCapability("build", buildNumber);
 			}
-			
+
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
+
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
-			
+
 		} else {
 			System.out.println("Running locally...");
 			final TestProperties properties = TestProperties.instance();
@@ -151,34 +155,36 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 					break;
 			}
 		}
-		
+
+		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
+
 		goToLoginPage();
 	}
-	
+
 	@After
 	public void stopWebDribver() {
 		driver.quit();
 	}
-	
+
 	public void login() {
 		loginPage = goToLoginPage();
 		loginPage.loginAsAdmin();
 	}
-	
+
 	public static IDatabaseTester getDbTester() throws Exception {
 		if (dbTester == null) {
 			initDatabaseConnection();
 		}
 		return dbTester;
 	}
-	
+
 	private static void initDatabaseConnection() throws Exception {
 		final TestProperties properties = TestProperties.instance();
 		dbTester = new JdbcDatabaseTester(
 		                                  properties.getDatabaseDriverclass(), properties.getDatabaseConnectionUrl(),
 		                                  properties.getDatabaseUsername(), properties.getDatabasePassword(), properties
 		                                          .getDatabaseSchema()) {
-			
+
 			// A bit of an ugly hack here, due to the fact that DbUnit is really intended for junit3
 			// but we're using it in junit4. When you use it with junit3, the getConnection method
 			// takes care of the config.setProperty calls for you. (see org.dbunit.DBTestCase.getConnection()
@@ -193,7 +199,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			}
 		};
 	}
-	
+
 	/**
 	 * Typically invoked from an @Before method.
 	 */
@@ -202,7 +208,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		getDbTester().setSetUpOperation(dbUnitSetUpOperation());
 		getDbTester().onSetup();
 	}
-	
+
 	/**
 	 * Override to setup a pre-test dataset.
 	 */
@@ -212,29 +218,29 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		IDataSet dataset = new FlatXmlDataSetBuilder().build(new StringReader(inputXml));
 		return dataset;
 	}
-	
+
 	/**
 	 * Override to change how DbUnit operates.
 	 */
 	protected DatabaseOperation dbUnitSetUpOperation() {
 		return DatabaseOperation.REFRESH;
 	}
-	
+
 	/**
 	 * Typically invoked from an @After method.
 	 */
-	
+
 	public void dbUnitTearDown() throws Exception {
 		dbUnitTearDownStatic(dbUnitTearDownOperation());
 	}
-	
+
 	/**
 	 * Typically invoked from an @AfterClass method.
 	 */
 	public static void dbUnitTearDownStatic() throws Exception {
 		dbUnitTearDownStatic(DatabaseOperation.DELETE);
 	}
-	
+
 	public static void dbUnitTearDownStatic(DatabaseOperation op) throws Exception {
 		if (deleteDataSet == null) {
 			return;
@@ -245,62 +251,62 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		getDbTester().onTearDown();
 		deleteDataSet = null;
 	}
-	
+
 	private boolean isRunningOnSauceLabs() {
 		return sauceLabsAuthentication != null;
 	}
-	
+
 	/**
 	 * Override to change how DbUnit operates.
 	 */
 	protected DatabaseOperation dbUnitTearDownOperation() {
 		return DatabaseOperation.DELETE;
 	}
-	
+
 	protected static QueryDataSet getDeleteDataSet() throws Exception {
 		if (deleteDataSet == null) {
 			deleteDataSet = newQueryDataSet();
 		}
 		return deleteDataSet;
 	}
-	
+
 	protected static QueryDataSet getCheckDataSet() throws Exception {
 		if (checkDataSet == null) {
 			checkDataSet = newQueryDataSet();
 		}
 		return checkDataSet;
 	}
-	
+
 	private static QueryDataSet newQueryDataSet() throws Exception {
 		return new QueryDataSet(getDbTester().getConnection());
 	}
-	
+
 	public LoginPage goToLoginPage() {
 		loginPage = new LoginPage(driver);
 		loginPage.goToPage(LoginPage.LOGIN_PATH);
 		return loginPage;
 	}
-	
+
 	// This takes a screen (well, browser) snapshot whenever there's a failure
 	// and stores it in a "screenshots" directory.
 	@Rule
 	public TestRule testWatcher = new TestWatcher() {
-		
+
 		@Override
 		public void failed(Throwable t, Description test) {
 			takeScreenshot(test.getDisplayName().replaceAll("[()]", ""));
 		}
 	};
-	
+
 	WebDriver setupFirefoxDriver() {
 		driver = new FirefoxDriver();
 		return driver;
 	}
-	
+
 	WebDriver setupChromeDriver() {
 		URL chromedriverExecutable = null;
 		ClassLoader classLoader = TestBase.class.getClassLoader();
-		
+
 		String chromedriverExecutableFilename = null;
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			chromedriverExecutableFilename = "chromedriver";
@@ -320,7 +326,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		} else {
 			chromedriverExecutablePath = chromedriverExecutable.getPath();
 			// This ugly bit checks to see if the chromedriver file is inside a jar, and if so
-			// uses VFS to extract it to a temp directory. 
+			// uses VFS to extract it to a temp directory.
 			if (chromedriverExecutablePath.contains(".jar!")) {
 				FileObject chromedriver_vfs;
 				try {
@@ -354,26 +360,26 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver = new ChromeDriver();
 		return driver;
 	}
-	
+
 	/**
 	 * Return a Page that represents the current page, so that all the convenient methods in Page
 	 * can be used.
-	 * 
+	 *
 	 * @return a Page
 	 */
 	public Page currentPage() {
 		return new GenericPage(driver);
 	}
-	
+
 	/**
 	 * Assert we're on the expected page.
-	 * 
+	 *
 	 * @param expected page
 	 */
 	public void assertPage(Page expected) {
 		assertEquals(expected.expectedUrlPath(), currentPage().urlPath());
 	}
-	
+
 	public void takeScreenshot(String filename) {
 		if (!isRunningOnSauceLabs()) {
 			File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
@@ -383,39 +389,39 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			catch (IOException e) {}
 		}
 	}
-	
+
 	static class TestClassName implements TestRule {
-		
+
 		private String className;
-		
+
 		@Override
 		public Statement apply(Statement statement, Description description) {
 			className = description.getTestClass().getSimpleName();
 			return statement;
 		}
-		
+
         public String getClassName() {
 	        return className;
         }
 	}
-	
+
 	public String patientIdFromUrl() {
 		String url = driver.getCurrentUrl();
 		return StringUtils.substringAfter(url, "patientId=");
 	}
-	
+
 	/**
 	 * Delete the given patient from the various tables that contain portions of a patient's info.
-	 * 
+	 *
 	 * @param uuid The uuid of the patient to delete.
 	 */
 	public void deletePatient(String uuid) throws NotFoundException {
 		RestClient.delete("patient/" + uuid);
 	}
-	
+
 	/**
 	 * Delete the given user from the various tables that contain portions of a user's info.
-	 * 
+	 *
 	 * @param user The database user info, especially the user_id and person_id.
 	 */
 	public static void deleteUser(UserInfo user) throws Exception {
@@ -438,10 +444,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		addSimpleQuery(dataSet, "user_property", "user_id", userid);
 		dbUnitTearDownStatic();
 	}
-	
+
 	/**
 	 * Delete the given role from the role table, if it was created by this framework.
-	 * 
+	 *
 	 * @param user The database role info.
 	 */
 	public static void deleteRole(RoleInfo role) throws Exception {
@@ -452,37 +458,37 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		addSimpleQuery(dataSet, "role", "uuid", '"' + role.uuid + '"');
 		dbUnitTearDownStatic();
 	}
-	
+
 	static void addSimpleQuery(QueryDataSet dataSet, String tableName, String columnName, String id)
 	        throws AmbiguousTableNameException {
 		String query = formatQuery(simpleQuery(tableName, columnName), id);
-		//System.out.println("addSimpleQuery: " + tableName + " " + query);		
+		//System.out.println("addSimpleQuery: " + tableName + " " + query);
 		dataSet.addTable(tableName, query);
 	}
-	
+
 	static String simpleQuery(String tableName, String columnName) {
 		return "select * from " + tableName + " where " + columnName + " = %s";
 	}
-	
+
 	static String formatQuery(String query, String id) {
 		return String.format(query, id);
 	}
-	
+
 	public PatientInfo createTestPatient(String patientIdentifierTypeName, String source) {
 		PatientInfo pi = TestData.generateRandomPatient();
 		String uuid = TestData.createPerson(pi);
 		pi.identifier = createPatient(uuid, patientIdentifierTypeName, source);
 		return pi;
 	}
-	
+
 	public PatientInfo createTestPatient() {
 		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE, "1");
 	}
-	
+
 	/**
 	 * Create a Patient in the database and return its Patient Identifier. The Patient Identifier is
 	 * obtained from the database.
-	 * 
+	 *
 	 * @param personUuid The person
 	 * @param patientIdentifierType The type of Patient Identifier to use
 	 * @return The Patient Identifier for the newly created patient
@@ -492,20 +498,20 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		RestClient.post("patient", new TestPatient(personUuid, patientIdentifier, patientIdentifierType));
 		return patientIdentifier;
 	}
-	
+
 	private String generatePatientIdentifier(String source) {
 		return RestClient.generatePatientIdentifier(source);
 	}
-	
+
 	/**
 	 * Returns the entire text of the "content" part of the current page
-	 * 
+	 *
 	 * @return the entire text of the "content" part of the current page
 	 */
 	public String pageContent() {
 		return driver.findElement(By.id("content")).getText();
 	}
-	
+
 	public EncounterInfo createTestEncounter(String encounterType, PatientInfo patient) {
 		EncounterInfo ei = new EncounterInfo();
 		ei.datetime = "2012-01-04"; // arbitrary
@@ -514,7 +520,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		TestData.createEncounter(ei); // sets the uuid
 		return ei;
 	}
-	
+
 	/**
 	 * Create a User in the database with the given Role and return its info.
 	 */
@@ -527,7 +533,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		TestData.createUser(ui);
 		return ui;
 	}
-	
+
 	/**
 	 * Create a User and Provider in the database with the given role and provider-role and return
 	 * its info.
@@ -535,7 +541,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	public static UserInfo createUser(String username, RoleInfo role, String providerRole) {
 		return createUser(username, role, providerRole, null);
 	}
-	
+
 	/**
 	 * Create a User and Provider in the database with the given role and provider-role and return
 	 * its info.
@@ -570,7 +576,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 		return ui;
 	}
-	
+
 	// Part of the above hack to workaround lack of REST support for provider role.
 	private static Integer getProviderRoleId(String providerRoleName) throws Exception {
 		QueryDataSet ds = newQueryDataSet();
@@ -579,7 +585,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		ITable providerRole = ds.getTable("providermanagement_provider_role");
 		return (Integer) providerRole.getValue(0, "provider_role_id");
 	}
-	
+
 	public static RoleInfo findOrCreateRole(String name) {
 		RoleInfo ri = new RoleInfo(name);
 		String uuid = TestData.getRoleUuid(name);
@@ -592,13 +598,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 		return ri;
 	}
-	
+
 	public void login(UserInfo user) {
 		LoginPage page = new LoginPage(driver);
 		assertPage(page);
 		page.login(user.username, user.password);
 	}
-	
+
 	protected void waitForPatientDeletion(String uuid) throws Exception {
 		Long startTime = System.currentTimeMillis();
 		while (checkIfPatientExists(uuid)) {
@@ -608,5 +614,5 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			}
 		}
 	}
-	
+
 }
