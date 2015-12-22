@@ -2,7 +2,6 @@ package org.openmrs.uitestframework.test;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -89,33 +88,33 @@ public class RestClient {
 	        return null;
         }
 	}
-	
+
 	private static Client newClient() {
 		return ClientBuilder.newClient().register(new HttpBasicAuthFilter(getUsername(), getPassword()));
 	}
-	
+
 	static String getUsername() {
 		return TestProperties.instance().getUserName();
 	}
-	
+
 	static String getPassword() {
 		return TestProperties.instance().getPassword();
 	}
-	
+
 	static String getWebAppUrl() {
 		return TestProperties.instance().getWebAppUrl();
 	}
-	
+
 	static void log(Object o) {
 		System.out.println(o);
 	}
-	
+
 	static void log(Object o, Exception e) {
 		System.out.println(o);
 		e.printStackTrace();
 	}
 
-	// Note this is not REST. 
+	// Note this is not REST.
 	public static String generatePatientIdentifier(String source) {
 		Client client = newClient();
 		WebTarget target = client.target(getWebAppUrl())
