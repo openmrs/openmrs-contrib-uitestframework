@@ -1,6 +1,6 @@
 package org.openmrs.uitestframework.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
 
 import java.io.File;
@@ -247,7 +247,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	 * @param expected page
 	 */
 	public void assertPage(Page expected) {
-		assertEquals(expected.getAbsolutePageUrl(), currentPage().getCurrentAbsoluteUrl());
+		assertTrue(currentPage().getCurrentAbsoluteUrl().contains(expected.getPageUrl()));
 	}
 
 	public void takeScreenshot(String filename) {
