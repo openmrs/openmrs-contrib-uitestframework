@@ -35,7 +35,7 @@ public abstract class Page {
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
 		public Boolean apply(WebDriver driver) {
-			if (!driver.getCurrentUrl().contains(getPageUrl())) {
+			if (!(driver.getCurrentUrl().contains(getPageUrl()) || driver.getCurrentUrl().contains(getPageAliasUrl()))) {
 				return false;
 			}
 
@@ -43,7 +43,7 @@ public abstract class Page {
 
 			if (hasPageReadyIndicator()) {
 				return "complete".equals(readyState) && Boolean.TRUE
-	                    .equals(executeScript("return (typeof pageReady !== 'undefined') ? pageReady : null;"));
+	                    .equals(executeScript("return (typeof " + getPageReadyIndicatorName() + "  !== 'undefined') ? " + getPageReadyIndicatorName() + " : null;"));
 			} else {
 				return "complete".equals(readyState);
 			}
@@ -78,6 +78,13 @@ public abstract class Page {
 	 */
 	public boolean hasPageReadyIndicator() {
 		return false;
+	}
+
+	/**
+	 * @return the page ready JavaScript variable, pageReady by default.
+	 */
+	public String getPageReadyIndicatorName() {
+		return "pageReady";
 	}
 
 	public Object executeScript(String script) {
@@ -191,6 +198,10 @@ public abstract class Page {
 	 * @return the page path
 	 */
 	public abstract String getPageUrl();
+
+	public String getPageAliasUrl() {
+		return null;
+	}
 
 	public String getContextPageUrl() {
 		return newContextPageUrl(getPageUrl());
