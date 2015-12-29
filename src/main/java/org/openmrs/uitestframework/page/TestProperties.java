@@ -70,7 +70,7 @@ public class TestProperties {
 			throw new RuntimeException("test.properties not found. Error: ", ioException);
 		}
 		System.out.println(WEBAPP_URL_PROPERTY + ": " + getWebAppUrl());
-		System.out.println(LOGIN_USERNAME_PROPERTY + ": " + getUserName());
+		System.out.println(LOGIN_USERNAME_PROPERTY + ": " + getUsername());
 		System.out.println(LOGIN_PASSWORD_PROPERTY + ": " + getPassword());
 		System.out.println(WEBDRIVER_PROPERTY + ": " + getWebDriver());
 	}
@@ -79,7 +79,7 @@ public class TestProperties {
 		return getProperty(WEBAPP_URL_PROPERTY, DEFAULT_WEBAPP_URL);
 	}
 
-	public String getUserName() {
+	public String getUsername() {
 		return getProperty(LOGIN_USERNAME_PROPERTY, DEFAULT_LOGIN_USERNAME);
 	}
 

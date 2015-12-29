@@ -12,7 +12,7 @@ public class GenericPage extends Page {
     }
 
 	@Override
-    public String expectedUrlPath() {
+    public String getPageUrl() {
 	    return null;
     }
 

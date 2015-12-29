@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.openmrs.uitestframework.test.TestBase;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -23,19 +22,21 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public abstract class Page {
 
-	public final String URL_ROOT;
+	protected final TestProperties properties = TestProperties.instance();
 
-	protected TestProperties properties = TestProperties.instance();
+	protected final WebDriver driver;
 
-	protected WebDriver driver;
+	protected final WebDriverWait waiter;
 
-	private String serverURL;
-
-	protected WebDriverWait waiter;
+	private final URL serverUrl;
 
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
 		public Boolean apply(WebDriver driver) {
+			if (!driver.getCurrentUrl().contains(getPageUrl())) {
+				return false;
+			}
+
 			Object readyState = executeScript("return document.readyState;");
 
 			if (hasPageReadyIndicator()) {
@@ -50,8 +51,12 @@ public abstract class Page {
 
 	public Page(WebDriver driver) {
 		this.driver = driver;
-		serverURL = properties.getWebAppUrl();
-		URL_ROOT = "/" + StringUtils.substringAfterLast(serverURL, "/");
+		try {
+			serverUrl = new URL(properties.getWebAppUrl());
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalArgumentException("webapp.url " + properties.getWebAppUrl() + " is not a valid URL", e);
+		}
 		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_SECONDS);
 	}
 
@@ -74,13 +79,13 @@ public abstract class Page {
 	}
 
 	public void goToPage(String address) {
-		driver.get(serverURL + address);
+		driver.get(serverUrl + address);
 
 		waitForPage();
 	}
 
 	public void go() {
-		driver.get(StringUtils.removeEnd(serverURL, URL_ROOT) + expectedUrlPath());
+		driver.get(getAbsolutePageUrl());
 
 		waitForPage();
 	}
@@ -149,13 +154,8 @@ public abstract class Page {
 		return getText(By.tagName("title"));
 	}
 
-	public String urlPath() {
-		try {
-			return new URL(driver.getCurrentUrl()).getPath();
-		}
-		catch (MalformedURLException e) {
-			return null;
-		}
+	public String getCurrentAbsoluteUrl() {
+		return driver.getCurrentUrl();
 	}
 
 	public List<WebElement> findElements(By by) {
@@ -166,11 +166,24 @@ public abstract class Page {
 	}
 
 	/**
-	 * Real pages supply their expected URL path.
+	 * Pages supply their URL.
 	 *
-	 * @return The path portion of the url of the page.
+	 * @return the page url
 	 */
-	public abstract String expectedUrlPath();
+	public abstract String getPageUrl();
+
+	public String getAbsolutePageUrl() {
+		try {
+			return new URL(serverUrl, getPageUrl()).getPath();
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalArgumentException("pageUrl " + getPageUrl() + " is not a valid URL");
+		}
+	}
+
+	public String getServerUrl() {
+		return serverUrl.getPath();
+	}
 
 	public void clickOnLinkFromHref(String href) throws InterruptedException {
 		// We allow use of xpath here because href's tend to be quite stable.

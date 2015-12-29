@@ -94,7 +94,7 @@ public class RestClient {
 	}
 
 	static String getUsername() {
-		return TestProperties.instance().getUserName();
+		return TestProperties.instance().getUsername();
 	}
 
 	static String getPassword() {

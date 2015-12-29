@@ -247,7 +247,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	 * @param expected page
 	 */
 	public void assertPage(Page expected) {
-		assertEquals(expected.expectedUrlPath(), currentPage().urlPath());
+		assertEquals(expected.getPageUrl(), currentPage().getCurrentAbsoluteUrl());
 	}
 
 	public void takeScreenshot(String filename) {

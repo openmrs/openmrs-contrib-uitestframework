@@ -10,11 +10,13 @@ import org.openqa.selenium.WebDriver;
 
 public class LoginPage extends Page {
 
+	public static final String LOGIN_PATH = "/login.htm";
+
 	static final By USERNAME = By.id("username");
 	static final By PASSWORD = By.id("password");
 	static final By LOGIN = By.id("loginButton");
 	static final By LOCATIONS = By.cssSelector("#sessionLocation li");
-	public static final String LOGIN_PATH = "/login.htm";
+
 	static final String LOGOUT_PATH = "/logout";
 	static final String CLERK_USERNAME = "clerk";
 	static final String CLERK_PASSWORD = "Clerk123";
@@ -25,25 +27,23 @@ public class LoginPage extends Page {
 	static final String SYSADMIN_USERNAME = "sysadmin";
 	static final String SYSADMIN_PASSWORD = "Sysadmin123";
 
-	private String UserName;
+	private String username;
 
-	private String Password;
+	private String password;
 
 	public LoginPage(WebDriver driver) {
 		super(driver);
-		UserName = properties.getUserName();
-		Password = properties.getPassword();
+		username = properties.getUsername();
+		password = properties.getPassword();
 	}
 
-	public void login(String user, String password, int location) {
-		waitForPage();
-
+	public void login(String user, String password, Integer location) {
 		postLoginForm(user, password, location);
 
-		findElement(byFromHref(URL_ROOT + LOGOUT_PATH)); // this waits until the log off link is present
+		findElement(byFromHref(getServerUrl() + LOGIN_PATH)); // this waits until the log off link is present
 	}
 
-	private void postLoginForm(String user, String password, int location) {
+	private void postLoginForm(String user, String password, Integer location) {
 	    String postJs;
 		InputStream in = null;
 		try {
@@ -56,7 +56,13 @@ public class LoginPage extends Page {
         	IOUtils.closeQuietly(in);
         }
 
-		((JavascriptExecutor) driver).executeScript(postJs + " post('" + expectedUrlPath() +"', {username: '" + user + "', password: '" + password + "', sessionLocation: " + location + "});");
+		String post = postJs + " post('" + getAbsolutePageUrl() +"', {username: '" + user + "', password: '" + password;
+		if (location != null) {
+			post += "', sessionLocation: " + location + "});";
+		} else {
+			post += "});";
+		}
+		((JavascriptExecutor) driver).executeScript(post);
     }
 
 	public void login(String user, String password) {
@@ -64,12 +70,12 @@ public class LoginPage extends Page {
 	}
 
 	public void loginAsAdmin() {
-		login(UserName, Password);
+		login(username, password);
 	}
 
 	@Override
-	public String expectedUrlPath() {
-		return URL_ROOT + LOGIN_PATH;
+	public String getPageUrl() {
+		return LOGIN_PATH;
 	}
 
 	public void loginAsClerk() {
