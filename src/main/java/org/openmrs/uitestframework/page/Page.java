@@ -57,6 +57,10 @@ public abstract class Page {
 		}
 	};
 
+	public Page(Page parent) {
+		this(parent.driver);
+	}
+
 	public Page(WebDriver driver) {
 		this.driver = driver;
 

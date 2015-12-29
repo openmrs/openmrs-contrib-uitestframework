@@ -26,7 +26,6 @@ import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.openmrs.uitestframework.page.GenericPage;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
@@ -81,7 +80,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	protected WebDriver driver;
 
-	protected LoginPage loginPage;
+	protected Page page;
 
 	public TestBase() {
 		String sauceLabsUsername = System.getProperty("SAUCELABS_USERNAME");
@@ -140,7 +139,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
 
-		goToLoginPage();
+		page = login();
 	}
 
 	@After
@@ -152,14 +151,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		return sauceLabsAuthentication != null;
 	}
 
-	public void login() {
-		loginPage = goToLoginPage();
-		loginPage.loginAsAdmin();
+	public Page login() {
+		return goToLoginPage().loginAsAdmin();
 	}
 
 	public LoginPage goToLoginPage() {
-		loginPage = new LoginPage(driver);
-		loginPage.goToPage(LoginPage.LOGIN_PATH);
+		LoginPage loginPage = new LoginPage(driver);
+		loginPage.go();
 
 		//refresh, just to be sure all css files and images are loaded properly
 		driver.navigate().refresh();
@@ -232,22 +230,12 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	/**
-	 * Return a Page that represents the current page, so that all the convenient methods in Page
-	 * can be used.
-	 *
-	 * @return a Page
-	 */
-	public Page currentPage() {
-		return new GenericPage(driver);
-	}
-
-	/**
 	 * Assert we're on the expected page.
 	 *
 	 * @param expected page
 	 */
 	public void assertPage(Page expected) {
-		assertTrue(currentPage().getCurrentAbsoluteUrl().contains(expected.getPageUrl()));
+		assertTrue(driver.getCurrentUrl().contains(expected.getPageUrl()));
 	}
 
 	public void takeScreenshot(String filename) {

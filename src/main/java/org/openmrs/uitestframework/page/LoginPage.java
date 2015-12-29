@@ -37,8 +37,14 @@ public class LoginPage extends Page {
 		password = properties.getPassword();
 	}
 
-	public void login(String user, String password, Integer location) {
+	@Override
+	public void go() {
+		goToPage(LOGOUT_PATH);
+	}
+
+	public Page login(String user, String password, Integer location) {
 		postLoginForm(user, password, location);
+		return this;
 	}
 
 	private void postLoginForm(String user, String password, Integer location) {
@@ -63,12 +69,12 @@ public class LoginPage extends Page {
 		((JavascriptExecutor) driver).executeScript(post);
     }
 
-	public void login(String user, String password) {
-		login(user, password, 1);
+	public Page login(String user, String password) {
+		return login(user, password, 1);
 	}
 
-	public void loginAsAdmin() {
-		login(username, password);
+	public Page loginAsAdmin() {
+		return login(username, password);
 	}
 
 	@Override
@@ -76,19 +82,19 @@ public class LoginPage extends Page {
 		return LOGIN_PATH;
 	}
 
-	public void loginAsClerk() {
-	    login(CLERK_USERNAME, CLERK_PASSWORD);
+	public Page loginAsClerk() {
+	    return login(CLERK_USERNAME, CLERK_PASSWORD);
     }
 
-	public void loginAsNurse() {
-		login(NURSE_USERNAME, NURSE_PASSWORD);
+	public Page loginAsNurse() {
+		return login(NURSE_USERNAME, NURSE_PASSWORD);
     }
 
-	public void loginAsDoctor() {
-		login(DOCTOR_USERNAME, DOCTOR_PASSWORD);
+	public Page loginAsDoctor() {
+		return login(DOCTOR_USERNAME, DOCTOR_PASSWORD);
     }
 
-	public void loginAsSysadmin() {
-		login(SYSADMIN_USERNAME, SYSADMIN_PASSWORD);
+	public Page loginAsSysadmin() {
+		return login(SYSADMIN_USERNAME, SYSADMIN_PASSWORD);
     }
 }
