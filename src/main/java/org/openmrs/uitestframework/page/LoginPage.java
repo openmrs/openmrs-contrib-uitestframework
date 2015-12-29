@@ -40,7 +40,7 @@ public class LoginPage extends Page {
 	public void login(String user, String password, Integer location) {
 		postLoginForm(user, password, location);
 
-		findElement(byFromHref(getServerUrl() + LOGIN_PATH)); // this waits until the log off link is present
+		findElement(byFromHref(getServerUrl() + LOGOUT_PATH)); // this waits until the log off link is present
 	}
 
 	private void postLoginForm(String user, String password, Integer location) {
