@@ -28,7 +28,9 @@ public abstract class Page {
 
 	protected final WebDriverWait waiter;
 
-	private final URL serverUrl;
+	private final String contextUrl;
+
+	private final String serverUrl;
 
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
@@ -51,12 +53,20 @@ public abstract class Page {
 
 	public Page(WebDriver driver) {
 		this.driver = driver;
+
+		String webAppUrl = properties.getWebAppUrl();
+		if (webAppUrl.endsWith("/")) {
+			webAppUrl = webAppUrl.substring(0, webAppUrl.length() - 1);
+		}
+		serverUrl = webAppUrl;
+
 		try {
-			serverUrl = new URL(properties.getWebAppUrl());
+			contextUrl = new URL(serverUrl).getPath();
 		}
 		catch (MalformedURLException e) {
 			throw new IllegalArgumentException("webapp.url " + properties.getWebAppUrl() + " is not a valid URL", e);
 		}
+
 		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_SECONDS);
 	}
 
@@ -78,10 +88,22 @@ public abstract class Page {
 		waiter.until(pageReady);
 	}
 
-	public void goToPage(String address) {
-		driver.get(serverUrl + address);
+	public String newContextPageUrl(String pageUrl) {
+		if (!pageUrl.startsWith("/")) {
+			pageUrl = "/" + pageUrl;
+		}
+		return contextUrl + pageUrl;
+	}
 
-		waitForPage();
+	public String newAbsolutePageUrl(String pageUrl) {
+		if (!pageUrl.startsWith("/")) {
+			pageUrl = "/" + pageUrl;
+		}
+		return serverUrl + pageUrl;
+	}
+
+	public void goToPage(String address) {
+		driver.get(newAbsolutePageUrl(address));
 	}
 
 	public void go() {
@@ -166,23 +188,16 @@ public abstract class Page {
 	}
 
 	/**
-	 * Pages supply their URL.
-	 *
-	 * @return the page url
+	 * @return the page path
 	 */
 	public abstract String getPageUrl();
 
-	public String getAbsolutePageUrl() {
-		try {
-			return new URL(serverUrl, getPageUrl()).getPath();
-		}
-		catch (MalformedURLException e) {
-			throw new IllegalArgumentException("pageUrl " + getPageUrl() + " is not a valid URL");
-		}
+	public String getContextPageUrl() {
+		return newContextPageUrl(getPageUrl());
 	}
 
-	public String getServerUrl() {
-		return serverUrl.getPath();
+	public String getAbsolutePageUrl() {
+		return newAbsolutePageUrl(getPageUrl());
 	}
 
 	public void clickOnLinkFromHref(String href) throws InterruptedException {

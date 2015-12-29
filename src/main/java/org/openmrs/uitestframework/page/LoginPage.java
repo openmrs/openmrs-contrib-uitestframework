@@ -39,8 +39,6 @@ public class LoginPage extends Page {
 
 	public void login(String user, String password, Integer location) {
 		postLoginForm(user, password, location);
-
-		findElement(byFromHref(getServerUrl() + LOGOUT_PATH)); // this waits until the log off link is present
 	}
 
 	private void postLoginForm(String user, String password, Integer location) {
@@ -56,7 +54,7 @@ public class LoginPage extends Page {
         	IOUtils.closeQuietly(in);
         }
 
-		String post = postJs + " post('" + getAbsolutePageUrl() +"', {username: '" + user + "', password: '" + password;
+		String post = postJs + " post('" + getContextPageUrl() +"', {username: '" + user + "', password: '" + password;
 		if (location != null) {
 			post += "', sessionLocation: " + location + "});";
 		} else {
