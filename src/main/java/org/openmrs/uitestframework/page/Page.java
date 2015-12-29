@@ -35,7 +35,7 @@ public abstract class Page {
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
 		public Boolean apply(WebDriver driver) {
-			if (!(driver.getCurrentUrl().contains(getPageUrl()) || driver.getCurrentUrl().contains(getPageAliasUrl()))) {
+			if (driver.getCurrentUrl() == null || !(driver.getCurrentUrl().contains(getPageUrl()) || driver.getCurrentUrl().contains(getPageAliasUrl()))) {
 				return false;
 			}
 
