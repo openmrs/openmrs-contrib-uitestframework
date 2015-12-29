@@ -35,8 +35,14 @@ public abstract class Page {
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
 		public Boolean apply(WebDriver driver) {
-			if (driver.getCurrentUrl() == null || !(driver.getCurrentUrl().contains(getPageUrl()) || driver.getCurrentUrl().contains(getPageAliasUrl()))) {
-				return false;
+			if (!driver.getCurrentUrl().contains(getPageUrl())) {
+				if (getPageAliasUrl() != null) {
+					if (!driver.getCurrentUrl().contains(getPageAliasUrl())) {
+						return false;
+					}
+				} else {
+					return false;
+				}
 			}
 
 			Object readyState = executeScript("return document.readyState;");
