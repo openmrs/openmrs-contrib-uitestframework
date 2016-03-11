@@ -20,9 +20,9 @@ import java.util.Properties;
  *     in test.properties:
  *       webapp.url=${webapp.url}
  *     in pom.xml:
- *       <properties>
- *          <webapp.url>http://localhost:8080/openmrs</webapp.url>
- *       </properties>
+ *       &lt;properties&gt;
+ *          &lt;webapp.url&gt;http://localhost:8080/openmrs&lt;/webapp.url&gt;
+ *       &lt;/properties&gt;
  */
 public class TestProperties {
 

@@ -51,9 +51,14 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
 
 /**
  * Superclass for all UI Tests. Contains lots of handy "utilities" needed to setup and tear down
- * tests as well as handy methods needed during tests, such as: - initialize Selenium WebDriver -
- * create (and delete) test patient, @see {@link #createTestPatient()} - @see {@link #currentPage()}
- * - @see {@link #assertPage(Page)} - @see {@link #pageContent()}
+ * tests as well as handy methods needed during tests, such as:
+ * <ul>
+ *     <li>initialize Selenium WebDriver</li>
+ *     <li>create (and delete) test patient, @see {@link #createTestPatient()}</li>
+ *     <li>@see {@link #goToLoginPage()}</li>
+ *     <li>@see {@link #login()}</li>
+ *     <li>@see {@link #assertPage(Page)} - @see {@link #pageContent()}</li>
+ * </ul>
  */
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
@@ -279,6 +284,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	 *
 	 * @param personUuid The person
 	 * @param patientIdentifierType The type of Patient Identifier to use
+	 * @param source the idgen source to use to generate an identifier
 	 * @return The Patient Identifier for the newly created patient
 	 */
 	public String createPatient(String personUuid, String patientIdentifierType, String source) {
@@ -311,6 +317,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	/**
 	 * Create a User in the database with the given Role and return its info.
+	 * @param username the username to create
+	 * @param role the roles to grant them
+	 * @return the user that was created
 	 */
 	public static UserInfo createUser(String username, RoleInfo role) {
 		UserInfo ui = (UserInfo) TestData.generateRandomPerson(new UserInfo());

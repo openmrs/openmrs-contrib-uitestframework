@@ -81,8 +81,7 @@ public abstract class Page {
 	}
 
 	/**
-	 * Override to return true, if a page has the 'pageReady' JavaScript variable. It is called by
-	 * {@link #loadPage()} to determine, if it should wait for the variable to return true.
+	 * Override to return true, if a page has the 'pageReady' JavaScript variable.
 	 *
 	 * @return true if the page has pageReady indicator, false by default
 	 */
