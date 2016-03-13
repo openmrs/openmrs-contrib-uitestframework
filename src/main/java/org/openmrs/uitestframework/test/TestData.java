@@ -430,8 +430,8 @@ public class TestData {
 		pi.familyName = "Tester" + suffix;
 		pi.gender = randomArrayEntry(GENDERS);
 		pi.birthDay = randomArrayEntry(DAYS);
-		pi.birthMonthIndex = randomArrayIndex(MONTHS);
-		pi.birthMonth = MONTHS[pi.birthMonthIndex];
+		pi.birthMonthIndex = randomArrayIndex(MONTHS) + 1; // +1 because bmi is 1-12 not 0-11
+		pi.birthMonth = MONTHS[pi.birthMonthIndex - 1];
 		pi.birthYear = randomArrayEntry(YEARS);
 		pi.address1 = "Address1" + suffix;
 		pi.address2 = "Address2" + suffix;
