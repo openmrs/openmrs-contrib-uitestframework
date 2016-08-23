@@ -3,6 +3,7 @@ package org.openmrs.uitestframework.page;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.openmrs.uitestframework.test.TestBase;
 import org.openqa.selenium.By;
@@ -295,6 +296,12 @@ public abstract class Page {
 	public void waitForElement(By by) {
 		waitForPage();
 
+		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
+	}
+
+	public void waitForElementWithSpecifiedMaxTimeout(By by, long secs) {
+		WebDriverWait waiter = new WebDriverWait(driver, secs);
+		waiter.until(pageReady);
 		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
 	}
 
