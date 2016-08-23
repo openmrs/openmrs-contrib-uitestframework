@@ -291,6 +291,26 @@ public class TestData {
 		}
 		
 	}
+
+	/**
+	 *https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Visit
+     */
+	public static class TestVisit extends JsonTestClass{
+		public String patient;
+		public String visitType;
+		public String location;
+
+		public TestVisit(String patient, String visitType, String location) {
+			this.patient = patient;
+			this.visitType = visitType;
+			this.location = location;
+		}
+
+		@Override
+		public String name() {
+			return "visit";
+		}
+	}
 	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");
