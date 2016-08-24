@@ -50,18 +50,14 @@ public class RestClient {
 	}
 
 	public static void delete(String restPath) {
-		delete(restPath, null);
-	}
-
-	// columns is a comma separated list (or null)
-	public static void delete(String restPath, String columns) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("purge");
-		if (columns != null) {
-			target = target.queryParam("v", "custom:(" + columns + ")");
-		}
-		String jsonString = target.request().delete(String.class);
-		if(!jsonString.isEmpty() ) {
-			throw new RuntimeException(jsonString);
+		try {
+			String jsonString = target.request().delete(String.class);
+			if (!jsonString.isEmpty()) {
+				throw new RuntimeException(jsonString);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("Delete request failed: " + target.getUri(), e);
 		}
 	}
 
