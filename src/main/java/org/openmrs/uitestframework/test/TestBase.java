@@ -264,7 +264,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	 * @param uuid The uuid of the patient to delete.
 	 */
 	public void deletePatient(String uuid) throws NotFoundException {
-		RestClient.delete("patient/" + uuid);
+		RestClient.delete("patient/" + uuid + "?purge");
 	}
 
 	public PatientInfo createTestPatient(String patientIdentifierTypeName, String source) {
