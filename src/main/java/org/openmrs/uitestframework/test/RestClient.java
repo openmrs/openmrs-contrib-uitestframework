@@ -55,7 +55,7 @@ public class RestClient {
 
 	// columns is a comma separated list (or null)
 	public static void delete(String restPath, String columns) {
-		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
+		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("purge");
 		if (columns != null) {
 			target = target.queryParam("v", "custom:(" + columns + ")");
 		}
