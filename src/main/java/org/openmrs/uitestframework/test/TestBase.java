@@ -255,7 +255,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public String patientIdFromUrl() {
 		String url = driver.getCurrentUrl();
-		return StringUtils.substringAfter(url, "patientId=");
+		return StringUtils.substringBefore(StringUtils.substringAfter(url, "patientId="), "&");
 	}
 
 	/**
