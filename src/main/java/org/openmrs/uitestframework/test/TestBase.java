@@ -62,7 +62,7 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  */
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
-	public static final int MAX_WAIT_SECONDS = 30;
+	public static final int MAX_WAIT_SECONDS = 60;
 
 	public String sessionId;
 
