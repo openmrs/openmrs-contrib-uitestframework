@@ -37,6 +37,7 @@ import org.openmrs.uitestframework.test.TestData.UserInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
@@ -172,7 +173,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	WebDriver setupFirefoxDriver() {
-		driver = new FirefoxDriver();
+		DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
+		driver = new FirefoxDriver(desiredCapabilities);
 		return driver;
 	}
 
