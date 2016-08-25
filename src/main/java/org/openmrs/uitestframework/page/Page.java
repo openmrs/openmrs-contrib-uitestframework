@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.uitestframework.test.TestBase;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -208,6 +209,14 @@ public abstract class Page {
 	 * @return the page path
 	 */
 	public abstract String getPageUrl();
+
+	public String getPatientUuidFromUrl() {
+		waitForPage();
+
+		String url = driver.getCurrentUrl();
+
+		return StringUtils.substringBefore(StringUtils.substringAfter(url, "patientId="), "&");
+	}
 
 	public String getPageAliasUrl() {
 		return null;

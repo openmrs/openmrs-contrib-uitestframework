@@ -50,7 +50,7 @@ public class RestClient {
 	}
 
 	public static void delete(String restPath) {
-		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("purge");
+		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
 		try {
 			String jsonString = target.request().delete(String.class);
 			if (!jsonString.isEmpty()) {

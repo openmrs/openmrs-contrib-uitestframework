@@ -253,11 +253,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 	}
 
-	public String patientIdFromUrl() {
-		String url = driver.getCurrentUrl();
-		return StringUtils.substringBefore(StringUtils.substringAfter(url, "patientId="), "&");
-	}
-
 	/**
 	 * Delete the given patient from the various tables that contain portions of a patient's info.
 	 *
