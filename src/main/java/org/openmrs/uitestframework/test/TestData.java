@@ -311,6 +311,24 @@ public class TestData {
 			return "visit";
 		}
 	}
+
+	/**
+	 *https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-VisitType
+	 */
+	public static class TestVisitType extends JsonTestClass{
+		public String name;
+		public String description;
+
+		public TestVisitType(String name, String description) {
+			this.name = name;
+			this.description = description;
+		}
+
+		@Override
+		public String name() {
+			return "visittype";
+		}
+	}
 	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");

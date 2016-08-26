@@ -2,11 +2,13 @@ package org.openmrs.uitestframework.page;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.uitestframework.test.TestBase;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -288,6 +290,12 @@ public abstract class Page {
 		waiter.until(ExpectedConditions.elementToBeClickable(by));
 	}
 
+	public void acceptAlert(){
+		waiter.until(ExpectedConditions.alertIsPresent());
+		Alert alert = driver.switchTo().alert();
+		alert.accept();
+	}
+
 	boolean hasFocus(String id) {
 		waitForPage();
 
@@ -324,6 +332,14 @@ public abstract class Page {
 		waitForPage();
 
 		return driver.getPageSource().contains(text);
+	}
+
+	public List<String> getValidationErrors(){
+		List<String> validationErrors = new ArrayList<String>();
+		for(WebElement webElement: driver.findElements(By.className("error"))){
+			validationErrors.add(webElement.getText());
+		}
+		return validationErrors;
 	}
 
 }
