@@ -64,6 +64,8 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_SECONDS = 60;
+	public static final int MAX_ATTEMPTS = 5;
+	public static final int MAX_INITIAL_CONNECTION_MILIS = 300000;
 
 	public String sessionId;
 
@@ -145,7 +147,22 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
 
-		page = login();
+		long start = System.currentTimeMillis();
+		//instead of 'while(true)' to prevent infinite loop
+		while(System.currentTimeMillis() < start + 2*MAX_INITIAL_CONNECTION_MILIS){
+			try{
+				page = login();
+				//interpret no exception as successful connection
+				break;
+			} catch(org.openqa.selenium.TimeoutException e){
+				if(System.currentTimeMillis() > start + MAX_INITIAL_CONNECTION_MILIS){
+					throw new RuntimeException("Failed to connect with testing server", e);
+				} else {
+					//log that connection timed out, and try again in next iteration
+					System.out.println("Failed to connect with testing server, trying again...");
+				}
+			}
+		}
 	}
 
 	@After
