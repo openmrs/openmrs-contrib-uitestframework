@@ -49,8 +49,8 @@ public class RestClient {
         }
 	}
 
-	public static void delete(String restPath) {
-		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("purge", "true");
+	public static void delete(String restPath, Boolean purge){
+		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath).queryParam("purge", purge);
 		try {
 			String jsonString = target.request().delete(String.class);
 			if (!jsonString.isEmpty()) {
@@ -59,6 +59,10 @@ public class RestClient {
 		} catch (Exception e) {
 			throw new IllegalStateException("Delete request failed: " + target.getUri(), e);
 		}
+	}
+
+	public static void delete(String restPath) {
+		delete(restPath, null);
 	}
 
 	public static JsonNode post(String restPath, JsonTestClass object) {
