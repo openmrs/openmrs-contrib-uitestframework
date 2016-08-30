@@ -329,6 +329,25 @@ public class TestData {
 			return "visittype";
 		}
 	}
+
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-LocationTag
+	 */
+	public static class TestLocationTag extends JsonTestClass {
+		public String name;
+		public String description;
+
+		public TestLocationTag(String name, String description) {
+			this.name = name;
+			this.description = description;
+		}
+
+		@Override
+		public String name() {
+			return "locationTag";
+		}
+
+	}
 	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");

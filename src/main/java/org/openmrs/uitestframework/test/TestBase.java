@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -291,6 +292,14 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public PatientInfo createTestPatient() {
 		return createTestPatient(TestData.OPENMRS_PATIENT_IDENTIFIER_TYPE, "1");
+	}
+
+	/**
+	 * @return uuid of created test location tag
+     */
+	public String createTestLocationTag() {
+		JsonNode responseBody = RestClient.post("/locationtag", new TestData.TestLocationTag("TAG" + TestData.randomSuffix(), "TEST TAG"));
+		return responseBody != null ? responseBody.get("uuid").asText() : null;
 	}
 
 	/**
