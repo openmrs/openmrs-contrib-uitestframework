@@ -66,7 +66,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_SECONDS = 60;
 	public static final int MAX_ATTEMPTS = 5;
-	public static final int MAX_INITIAL_CONNECTION_MILIS = 300000;
+	public static final int MAX_INITIAL_CONNECTION_MILIS = 600000;
 
 	public String sessionId;
 
