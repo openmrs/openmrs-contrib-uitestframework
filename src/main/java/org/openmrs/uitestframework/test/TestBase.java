@@ -92,8 +92,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	protected Page page;
 
 	public TestBase() {
-		String sauceLabsUsername = System.getProperty("SAUCELABS_USERNAME");
-		String sauceLabsAccessKey = System.getProperty("SAUCELABS_ACCESSKEY");
+		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
+		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
 
 		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
