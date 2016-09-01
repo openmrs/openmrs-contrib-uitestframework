@@ -64,9 +64,10 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  */
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
-	public static final int MAX_WAIT_SECONDS = 60;
-	public static final int MAX_ATTEMPTS = 5;
-	public static final int MAX_INITIAL_CONNECTION_MILIS = 600000;
+	public static final int MAX_WAIT_IN_SECONDS = 60;
+	public static final int MAX_PAGE_LOAD_IN_SECONDS = 120;
+	public static final int MAX_SERVER_STARTUP_IN_MILLISECONDS = 10 * 60 * 1000;
+	public static final int MAX_SAUCELAB_COMMAND_TIMEOUT_IN_SECONDS = 600;
 
 	public String sessionId;
 
@@ -119,6 +120,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
 
+			capabilities.setCapability("commandTimeout", MAX_SAUCELAB_COMMAND_TIMEOUT_IN_SECONDS);
+
 			String buildNumber = System.getProperty("buildNumber");
 			if (!StringUtils.isBlank(buildNumber)) {
 				capabilities.setCapability("build", buildNumber);
@@ -147,22 +150,23 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			}
 		}
 
-		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(MAX_WAIT_SECONDS * 2, TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(MAX_WAIT_IN_SECONDS, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
 		//instead of 'while(true)' to prevent infinite loop
-		while(System.currentTimeMillis() < start + 2*MAX_INITIAL_CONNECTION_MILIS){
+		while(System.currentTimeMillis() < start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
 			try{
 				page = login();
-				//interpret no exception as successful connection
+				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
+				//and interpret no exception as successful connection
 				break;
 			} catch(Exception e){
-				if(System.currentTimeMillis() > start + MAX_INITIAL_CONNECTION_MILIS){
-					throw new RuntimeException("Failed to connect with testing server", e);
+				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
+					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds.", e);
 				} else {
 					//log that connection timed out, and try again in next iteration
-					System.out.println("Failed to connect with testing server, trying again...");
+					System.out.println("Failed to login to the testing server, trying again...");
 				}
 			}
 		}

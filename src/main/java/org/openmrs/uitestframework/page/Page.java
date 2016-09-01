@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.uitestframework.test.TestBase;
@@ -81,7 +80,7 @@ public abstract class Page {
 			throw new IllegalArgumentException("webapp.url " + properties.getWebAppUrl() + " is not a valid URL", e);
 		}
 
-		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_SECONDS);
+		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_IN_SECONDS);
 	}
 
 	/**
