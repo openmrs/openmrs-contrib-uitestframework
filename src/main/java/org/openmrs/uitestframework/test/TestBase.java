@@ -99,6 +99,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
 			sauceLabsResultReportingTestWatcher = new SauceOnDemandTestWatcher(this, sauceLabsAuthentication);
 		}
+
 	}
 
 	@Override
@@ -108,6 +109,23 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	@Before
 	public void startWebDriver() throws Exception {
+		long start = System.currentTimeMillis();
+		//instead of 'while(true)' to prevent infinite loop
+		while(System.currentTimeMillis() < start + 2*MAX_INITIAL_CONNECTION_MILIS){
+			try{
+				page = login();
+				//interpret no exception as successful connection
+				break;
+			} catch(org.openqa.selenium.TimeoutException e){
+				if(System.currentTimeMillis() > start + MAX_INITIAL_CONNECTION_MILIS){
+					throw new RuntimeException("Failed to connect with testing server", e);
+				} else {
+					//log that connection timed out, and try again in next iteration
+					System.out.println("Failed to connect with testing server, trying again...");
+				}
+			}
+		}
+
 		if (isRunningOnSauceLabs()) {
 			System.out.println("Running on SauceLabs...");
 			DesiredCapabilities capabilities = new DesiredCapabilities();
@@ -148,22 +166,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
 
-		long start = System.currentTimeMillis();
-		//instead of 'while(true)' to prevent infinite loop
-		while(System.currentTimeMillis() < start + 2*MAX_INITIAL_CONNECTION_MILIS){
-			try{
-				page = login();
-				//interpret no exception as successful connection
-				break;
-			} catch(org.openqa.selenium.TimeoutException e){
-				if(System.currentTimeMillis() > start + MAX_INITIAL_CONNECTION_MILIS){
-					throw new RuntimeException("Failed to connect with testing server", e);
-				} else {
-					//log that connection timed out, and try again in next iteration
-					System.out.println("Failed to connect with testing server, trying again...");
-				}
-			}
-		}
+
 	}
 
 	@After
