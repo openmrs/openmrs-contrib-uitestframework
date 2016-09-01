@@ -148,7 +148,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 
 		driver.manage().timeouts().implicitlyWait(MAX_WAIT_SECONDS, TimeUnit.SECONDS);
-		
+		driver.manage().timeouts().pageLoadTimeout(MAX_WAIT_SECONDS * 2, TimeUnit.SECONDS);
+
 		long start = System.currentTimeMillis();
 		//instead of 'while(true)' to prevent infinite loop
 		while(System.currentTimeMillis() < start + 2*MAX_INITIAL_CONNECTION_MILIS){
