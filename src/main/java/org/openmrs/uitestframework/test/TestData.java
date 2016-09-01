@@ -113,6 +113,20 @@ public class TestData {
 
 	}
 
+	public static class TestLocation extends JsonTestClass {
+
+		public TestLocation(String name) {
+			this.name = name;
+		}
+
+		public String name;
+
+		@Override
+		public String name() {
+			return "location";
+		}
+	}
+
 	/**
 	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-PersonName
 	 */
