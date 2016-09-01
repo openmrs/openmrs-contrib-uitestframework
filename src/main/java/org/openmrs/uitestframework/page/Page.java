@@ -207,6 +207,11 @@ public abstract class Page {
 		return driver.findElements(by);
 	}
 
+	public void waitForStalenessOf(WebElement webElement) {
+		waitForPage();
+		waiter.until(ExpectedConditions.stalenessOf(webElement));
+	}
+
 	/**
 	 * @return the page path
 	 */
