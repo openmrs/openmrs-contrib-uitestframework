@@ -73,6 +73,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public SauceOnDemandAuthentication sauceLabsAuthentication;
 
+	public String sauceLabsHubUrl;
+
 	@Rule
 	public SauceOnDemandTestWatcher sauceLabsResultReportingTestWatcher;
 
@@ -95,6 +97,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	public TestBase() {
 		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
 		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
+		sauceLabsHubUrl = TestProperties.instance().getProperty("saucelabs.hub.url", "ondemand.saucelabs.com:80");
 
 		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
@@ -128,7 +131,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			}
 
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
-			        + sauceLabsAuthentication.getAccessKey() + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);
+			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
 
