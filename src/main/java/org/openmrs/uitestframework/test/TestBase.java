@@ -130,6 +130,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				capabilities.setCapability("build", buildNumber);
 			}
 
+			String tunnelIdentifier = System.getProperty("tunnel.identifier");
+			if (!StringUtils.isBlank(tunnelIdentifier)) {
+				capabilities.setCapability("tunnel-identifier", tunnelIdentifier);
+			}
+
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
