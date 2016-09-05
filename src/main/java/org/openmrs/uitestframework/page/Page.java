@@ -60,8 +60,16 @@ public abstract class Page {
 		}
 	};
 
+	public Page(Page parent, WebElement waitForStaleness){
+	    this(parent.driver);
+        waitForStalenessOf(waitForStaleness);
+    }
+
 	public Page(Page parent) {
 		this(parent.driver);
+		if(this.getClass().isInstance(parent)){
+			throw new RuntimeException("When returning the same page use the two arguments constructor");
+		}
 	}
 
 	public Page(WebDriver driver) {
