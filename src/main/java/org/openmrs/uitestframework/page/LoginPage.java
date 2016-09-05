@@ -70,8 +70,7 @@ public class LoginPage extends Page {
     }
 
 	public Page login(String user, String password) {
-		String value = findElement(By.cssSelector("#sessionLocation li")).getAttribute("value");
-		return login(user, password, Integer.parseInt(value));
+		return login(user, password, 1);
 	}
 
 	public Page loginAsAdmin() {
