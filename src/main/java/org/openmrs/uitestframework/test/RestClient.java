@@ -25,11 +25,18 @@ public class RestClient {
 		return get(restPath, null);
     }
 
-	// columns is a comma separated list (or null)
 	public static JsonNode get(String restPath, String columns) {
+		return get(restPath, columns, null);
+	}
+
+	// columns is a comma separated list (or null)
+	public static JsonNode get(String restPath, String columns, String searchQuery) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
 		if (columns != null) {
 			target = target.queryParam("v", "custom:(" + columns + ")");
+		}
+		if(searchQuery != null){
+			target = target.queryParam("q", searchQuery);
 		}
 		String jsonString = target.request().get(String.class);
         try {

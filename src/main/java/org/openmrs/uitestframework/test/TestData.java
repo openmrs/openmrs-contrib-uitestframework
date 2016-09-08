@@ -117,9 +117,16 @@ public class TestData {
 
 		public TestLocation(String name) {
 			this.name = name;
+			this.tags = new ArrayList<String>();
+		}
+
+		public TestLocation(String name, List<String> tags) {
+			this.name = name;
+			this.tags = tags;
 		}
 
 		public String name;
+		public List<String> tags;
 
 		@Override
 		public String name() {
@@ -365,6 +372,11 @@ public class TestData {
 	
 	public static String getALocation() {
 		JsonNode locations = RestClient.get("location");
+		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
+	}
+
+	public static String getLocationTag(String name) {
+		JsonNode locations = RestClient.get("locationtag", null, name);
 		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
 	}
 
