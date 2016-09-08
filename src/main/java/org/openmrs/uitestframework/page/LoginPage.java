@@ -74,8 +74,17 @@ public class LoginPage extends Page {
 		return login(user, password, Integer.parseInt(value));
 	}
 
+	public Page login(String user, String password, String locationName) {
+		String value = findElement(By.id(locationName)).getAttribute("value");
+		return login(user, password, Integer.parseInt(value));
+	}
+
 	public Page loginAsAdmin() {
 		return login(username, password);
+	}
+
+	public Page loginAsAdmin(String locationName) {
+		return login(username, password, locationName);
 	}
 
 	@Override
