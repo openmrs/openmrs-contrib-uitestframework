@@ -368,6 +368,11 @@ public class TestData {
 		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first location
 	}
 
+	public static String getAVisitType() {
+		JsonNode locations = RestClient.get("visittype");
+		return locations.get("results").get(0).get("uuid").asText(); // arbitrarily choose the first visit type
+	}
+
 	public static String getIdentifierTypeUuid(String name) {
 		JsonNode json = RestClient.get("patientidentifiertype");
 		return getFromJsonResults(json, "display", name, "uuid");
