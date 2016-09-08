@@ -194,7 +194,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	public LoginPage goToLoginPage() {
-		LoginPage loginPage = new LoginPage(driver);
+		LoginPage loginPage = getLoginPage();
 		loginPage.go();
 
 		//refresh, just to be sure all css files and images are loaded properly
@@ -202,6 +202,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		loginPage.waitForPage();
 
 		return loginPage;
+	}
+
+	protected LoginPage getLoginPage() {
+		return new LoginPage(driver);
 	}
 
 	WebDriver setupFirefoxDriver() {
@@ -370,7 +374,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	public void login(UserInfo user) {
-		LoginPage page = new LoginPage(driver);
+		LoginPage page = getLoginPage();
 		assertPage(page);
 		page.login(user.username, user.password);
 	}
