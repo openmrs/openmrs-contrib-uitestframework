@@ -6,12 +6,15 @@ import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.saucelabs.junit.ConcurrentParameterized;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -27,6 +30,7 @@ import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.junit.runner.RunWith;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
@@ -62,6 +66,7 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  *     <li>@see {@link #assertPage(Page)} - @see {@link #pageContent()}</li>
  * </ul>
  */
+@RunWith(ConcurrentParameterized.class)
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_IN_SECONDS = 120;
@@ -94,6 +99,23 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	protected Page page;
 
+	@ConcurrentParameterized.Parameter
+	public String platform;
+
+	@ConcurrentParameterized.Parameter(value = 1)
+	public String browser;
+
+	@ConcurrentParameterized.Parameter(value = 2)
+	public String browserVersion;
+
+	@ConcurrentParameterized.Parameters(name = "{index}: {0} {1} {2}")
+	public static Collection<Object[]> getBrowsers() {
+		return Arrays.asList(new Object[][] {
+				{"Linux", "Firefox", "42"},
+				{"Linux", "Chrome", "48.0"}
+		});
+	}
+
 	public TestBase() {
 		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
 		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
@@ -117,9 +139,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			System.out.println("Running on SauceLabs...");
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 
-			capabilities.setCapability(CapabilityType.BROWSER_NAME, "firefox");
-			capabilities.setCapability(CapabilityType.VERSION, "42.0");
-			capabilities.setCapability(CapabilityType.PLATFORM, "Linux");
+			capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
+			capabilities.setCapability(CapabilityType.VERSION, browserVersion);
+			capabilities.setCapability(CapabilityType.PLATFORM, platform);
 
 			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
 
