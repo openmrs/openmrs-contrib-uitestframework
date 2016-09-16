@@ -31,6 +31,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
@@ -66,7 +67,7 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  *     <li>@see {@link #assertPage(Page)} - @see {@link #pageContent()}</li>
  * </ul>
  */
-@RunWith(ConcurrentParameterized.class)
+@RunWith(Parameterized.class)
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_IN_SECONDS = 120;
@@ -99,16 +100,16 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	protected Page page;
 
-	@ConcurrentParameterized.Parameter
+	@Parameterized.Parameter
 	public String platform;
 
-	@ConcurrentParameterized.Parameter(value = 1)
+	@Parameterized.Parameter(value = 1)
 	public String browser;
 
-	@ConcurrentParameterized.Parameter(value = 2)
+	@Parameterized.Parameter(value = 2)
 	public String browserVersion;
 
-	@ConcurrentParameterized.Parameters(name = "{index}: {0} {1} {2}")
+	@Parameterized.Parameters(name = "{index}: {0} {1} {2}")
 	public static Collection<Object[]> getBrowsers() {
 		return Arrays.asList(new Object[][] {
 				{"Linux", "Firefox", "42"},
