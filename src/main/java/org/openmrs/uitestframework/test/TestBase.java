@@ -154,7 +154,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			String buildNumber = System.getProperty("buildNumber");
 			if (!StringUtils.isBlank(buildNumber)) {
 				capabilities.setCapability("build", buildNumber);
-				capabilities.setCapability("tunnel-identifier", buildNumber);
+			}
+			
+			String saucelabsTunnel = System.getProperty("saucelabsTunnel");
+			if (!StringUtils.isBlank(tunnelId)) {
+				capabilities.setCapability("tunnel-identifier", saucelabsTunnel);
 			}
 			
 			String branch = System.getProperty("branch");
