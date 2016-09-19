@@ -153,16 +153,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 			String buildNumber = System.getProperty("buildNumber");
 			if (!StringUtils.isBlank(buildNumber)) {
-				String branch = System.getProperty("branch");
-				if (!StringUtils.isBlank(branch)) {
-					buildNumber += "-" + branch;
-				}
 				capabilities.setCapability("build", buildNumber);
+				capabilities.setCapability("tunnel-identifier", buildNumber);
 			}
-
-			String tunnelIdentifier = System.getProperty("tunnel.identifier");
-			if (!StringUtils.isBlank(tunnelIdentifier)) {
-				capabilities.setCapability("tunnel-identifier", tunnelIdentifier);
+			
+			String branch = System.getProperty("branch");
+			if (!StringUtils.isBlank(branch)) {
+				capabilities.setCapability("tags", branch);
 			}
 
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
