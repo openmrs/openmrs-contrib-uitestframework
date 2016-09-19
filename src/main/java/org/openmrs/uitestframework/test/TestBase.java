@@ -150,6 +150,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 			String buildNumber = System.getProperty("buildNumber");
 			if (!StringUtils.isBlank(buildNumber)) {
+				String branch = System.getProperty("branch");
+				if (!StringUtils.isBlank(branch)) {
+					buildNumber += "-" + branch;
+				}
 				capabilities.setCapability("build", buildNumber);
 			}
 
