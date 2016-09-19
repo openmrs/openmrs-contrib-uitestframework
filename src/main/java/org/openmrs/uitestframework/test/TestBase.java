@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
@@ -169,6 +172,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
 				break;
+			} catch(ServerErrorException e){
+				throw new RuntimeException("Failed to connect with server", e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
 					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds.", e);
@@ -195,8 +200,18 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public LoginPage goToLoginPage() {
 		LoginPage loginPage = getLoginPage();
-		loginPage.go();
 
+		Response response = ClientBuilder.newClient()
+				.target(TestProperties.instance().getWebAppUrl())
+				.path(loginPage.getPageUrl())
+				.request().get();
+
+
+		if(response.getStatus() == 500){
+			throw new ServerErrorException(response.getStatusInfo().getReasonPhrase(), 500);
+		}
+
+		loginPage.go();
 		//refresh, just to be sure all css files and images are loaded properly
 		driver.navigate().refresh();
 		loginPage.waitForPage();
