@@ -235,8 +235,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				.request().get();
 
 
-		if(response.getStatus() == 500){
-			throw new ServerErrorException(response.getStatusInfo().getReasonPhrase(), 500);
+		int status = response.getStatus();
+
+		if(status >= 400 && status <= 599){
+			throw new ServerErrorException(response.getStatusInfo().getReasonPhrase(), status);
 		}
 
 		loginPage.go();
