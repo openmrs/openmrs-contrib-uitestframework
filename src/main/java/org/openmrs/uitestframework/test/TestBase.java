@@ -139,6 +139,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	@Before
 	public void startWebDriver() throws Exception {
+		String testMethod = getClass().getSimpleName() + "." + testName.getMethodName();
 		if (isRunningOnSauceLabs()) {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 
@@ -146,7 +147,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			capabilities.setCapability(CapabilityType.VERSION, browserVersion);
 			capabilities.setCapability(CapabilityType.PLATFORM, platform);
 
-			capabilities.setCapability("name", getClass().getSimpleName() + "." + testName.getMethodName());
+			capabilities.setCapability("name", testMethod);
 
 			capabilities.setCapability("commandTimeout", MAX_SAUCELAB_COMMAND_TIMEOUT_IN_SECONDS);
 
@@ -169,7 +170,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
-			System.out.println("Running " + getClass().getSimpleName() + "." + testName.getMethodName() + " at https://saucelabs.com/tests/" + this.sessionId);
+			System.out.println("Running " + testMethod + " at https://saucelabs.com/tests/" + this.sessionId);
 		} else {
 			System.out.println("Running locally...");
 			final TestProperties properties = TestProperties.instance();
@@ -200,13 +201,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//and interpret no exception as successful connection
 				break;
 			} catch(ServerErrorException e){
-				throw new RuntimeException("Failed to connect with server", e);
+				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
-					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds.", e);
+					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds in " + testMethod, e);
 				} else {
 					//log that connection timed out, and try again in next iteration
-					System.out.println("Failed to login to the testing server, trying again...");
+					System.out.println("Failed to login to the testing server in " + testMethod + ", trying again...");
 				}
 			}
 		}
