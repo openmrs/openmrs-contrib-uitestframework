@@ -59,20 +59,13 @@ public class TestProperties {
 			URL resource = Thread.currentThread().getContextClassLoader()
 			        .getResource("org/openmrs/uitestframework/test.properties");
 			if (resource != null) {
-				System.out.println("test.properties found: " + resource.toExternalForm());
 				InputStream input = resource.openStream();
 				properties.load(new InputStreamReader(input, "UTF-8"));
-				System.out.println("test.properties:");
-				System.out.println(properties);
 			}
 		}
 		catch (IOException ioException) {
-			throw new RuntimeException("test.properties not found. Error: ", ioException);
+			throw new RuntimeException("Could not find test.properties", ioException);
 		}
-		System.out.println(WEBAPP_URL_PROPERTY + ": " + getWebAppUrl());
-		System.out.println(LOGIN_USERNAME_PROPERTY + ": " + getUsername());
-		System.out.println(LOGIN_PASSWORD_PROPERTY + ": " + getPassword());
-		System.out.println(WEBDRIVER_PROPERTY + ": " + getWebDriver());
 	}
 
 	public String getWebAppUrl() {
