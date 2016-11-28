@@ -43,15 +43,15 @@ public class RestClient {
 	        return new ObjectMapper().readValue(jsonString, JsonNode.class);
         }
         catch (JsonParseException e) {
-	        log("error during REST get", e);
+	        log("GET " + restPath + " failed", e);
 	        return null;
         }
         catch (JsonMappingException e) {
-	        log("error during REST get", e);
+	        log("GET " + restPath + " failed", e);
 	        return null;
         }
         catch (IOException e) {
-	        log("error during REST get", e);
+	        log("GET " + restPath + " failed", e);
 	        return null;
         }
 	}
@@ -74,26 +74,16 @@ public class RestClient {
 
 	public static JsonNode post(String restPath, JsonTestClass object) {
 		WebTarget target = newClient().target(getWebAppUrl()).path(REST_ROOT + restPath);
-        try {
-        	String objectAsJson = object.asJson();
-			System.out.println("Post " + objectAsJson + " to " + restPath);
+		try {
+			String objectAsJson = object.asJson();
 			Entity<String> entity = Entity.entity(objectAsJson, MediaType.APPLICATION_JSON_TYPE);
-        	String json = target.request(MediaType.APPLICATION_JSON_TYPE).post(entity, String.class);
-			System.out.println("Responded with " + json);
-	        return new ObjectMapper().readValue(json, JsonNode.class);
-        }
-        catch (JsonParseException e) {
-	        log("error during REST post", e);
-	        return null;
-        }
-        catch (JsonMappingException e) {
-	        log("error during REST post", e);
-	        return null;
-        }
-        catch (IOException e) {
-	        log("error during REST post", e);
-	        return null;
-        }
+			String json = target.request(MediaType.APPLICATION_JSON_TYPE).post(entity, String.class);
+			return new ObjectMapper().readValue(json, JsonNode.class);
+		}
+		catch (Exception e) {
+			log("POST " + restPath + " failed", e);
+			return null;
+		}
 	}
 
 	private static Client newClient() {
@@ -130,23 +120,15 @@ public class RestClient {
 				.queryParam("username", getUsername())
 				.queryParam("password", getPassword());
 		String jsonString = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
-        JsonNode json;
-        try {
-	        json = new ObjectMapper().readValue(jsonString, JsonNode.class);
-        }
-        catch (JsonParseException e) {
-	        log("error during generatePatientIdentifier", e);
-	        return null;
-        }
-        catch (JsonMappingException e) {
-	        log("error during generatePatientIdentifier", e);
-	        return null;
-        }
-        catch (IOException e) {
-	        log("error during generatePatientIdentifier", e);
-	        return null;
-        }
+		JsonNode json;
+		try {
+			json = new ObjectMapper().readValue(jsonString, JsonNode.class);
+		}
+		catch (Exception e) {
+			log("GET /module/idgen/generateIdentifier.form failed", e);
+			return null;
+		}
 		return json.get("identifiers").get(0).asText();
-    }
+	}
 
 }
