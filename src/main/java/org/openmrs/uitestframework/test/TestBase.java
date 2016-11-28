@@ -169,7 +169,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
-			System.out.println("Running at https://saucelabs.com/tests/" + this.sessionId);
+			System.out.println("Running " + getClass().getSimpleName() + "." + testName.getMethodName() + "at https://saucelabs.com/tests/" + this.sessionId);
 		} else {
 			System.out.println("Running locally...");
 			final TestProperties properties = TestProperties.instance();
