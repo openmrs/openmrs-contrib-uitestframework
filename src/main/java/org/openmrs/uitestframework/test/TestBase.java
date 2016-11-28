@@ -140,7 +140,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	@Before
 	public void startWebDriver() throws Exception {
 		if (isRunningOnSauceLabs()) {
-			System.out.println("Running on SauceLabs...");
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 
 			capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
@@ -170,7 +169,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
 			this.sessionId = (((RemoteWebDriver) driver).getSessionId()).toString();
-
+			System.out.println("Running at https://saucelabs.com/tests/" + this.sessionId);
 		} else {
 			System.out.println("Running locally...");
 			final TestProperties properties = TestProperties.instance();
