@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
@@ -200,7 +201,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
 				break;
-			} catch(ServerErrorException e){
+			} catch(ServerErrorException e) {
+				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
+			} catch (ProcessingException e){
 				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
