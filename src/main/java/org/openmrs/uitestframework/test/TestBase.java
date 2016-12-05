@@ -18,7 +18,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.saucelabs.junit.ConcurrentParameterized;
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -203,8 +203,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				break;
 			} catch(ServerErrorException e) {
 				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
-			} catch (ProcessingException e){
+			} catch (ProcessingException e) {
 				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
+			} catch (IllegalStateException e) {
+				throw new RuntimeException("Server failure in " + testMethod, e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
 					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds in " + testMethod, e);
