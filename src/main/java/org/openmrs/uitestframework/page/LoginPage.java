@@ -11,7 +11,6 @@ import org.openqa.selenium.WebDriver;
 public class LoginPage extends Page {
 
 	public static final String LOGIN_PATH = "/login.htm";
-	public static final String MODULES_NOT_RUNNING_MESSAGE = "If you are seeing this page, it means that the OpenMRS Platform is running";
 
 	static final By USERNAME = By.id("username");
 	static final By PASSWORD = By.id("password");
@@ -41,15 +40,6 @@ public class LoginPage extends Page {
 	@Override
 	public void go() {
 		goToPage(LOGOUT_PATH);
-	}
-
-	@java.lang.Override
-	public void waitForPage() {
-		super.waitForPage();
-
-		if (containsText(MODULES_NOT_RUNNING_MESSAGE)) {
-			throw new IllegalStateException("Server did not start up properly. UI modules are not running.");
-		}
 	}
 
 	public Page login(String user, String password, Integer location) {
