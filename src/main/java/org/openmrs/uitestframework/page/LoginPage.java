@@ -45,11 +45,11 @@ public class LoginPage extends Page {
 
 	@java.lang.Override
 	public void waitForPage() {
-		super.waitForPage();
-
 		if (containsText(MODULES_NOT_RUNNING_MESSAGE)) {
 			throw new IllegalStateException("Server did not start up properly. UI modules are not running.");
 		}
+
+		super.waitForPage();
 	}
 
 	public Page login(String user, String password, Integer location) {
