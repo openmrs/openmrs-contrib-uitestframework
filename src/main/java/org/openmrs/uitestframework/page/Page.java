@@ -340,6 +340,10 @@ public abstract class Page {
 		waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
 	}
 
+	public boolean containsTextWithoutWait(String text) {
+		return driver.getPageSource().contains(text);
+	}
+
 	public Boolean containsText(String text) {
 		waitForPage();
 
