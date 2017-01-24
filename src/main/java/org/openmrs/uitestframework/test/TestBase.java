@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -202,11 +203,17 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//and interpret no exception as successful connection
 				break;
 			} catch(ServerErrorException e) {
-				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
+				System.out.println ("Test suite killed due to server failure in " + testMethod);
+				ExceptionUtils.printRootCauseStackTrace(e);
+				System.exit(1);
 			} catch (ProcessingException e) {
-				throw new RuntimeException("Failed to connect with server in " + testMethod, e);
+				System.out.println ("Test suite killed due to server failure in " + testMethod);
+				ExceptionUtils.printRootCauseStackTrace(e);
+				System.exit(1);
 			} catch (IllegalStateException e) {
-				throw new RuntimeException("Server failure in " + testMethod, e);
+				System.out.println ("Test suite killed due to server failure in " + testMethod);
+				ExceptionUtils.printRootCauseStackTrace(e);
+				System.exit(1);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
 					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds in " + testMethod, e);
