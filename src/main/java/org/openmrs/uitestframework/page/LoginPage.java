@@ -45,7 +45,7 @@ public class LoginPage extends Page {
 
 	@java.lang.Override
 	public void waitForPage() {
-		if (containsTextWithoutWait(MODULES_NOT_RUNNING_MESSAGE)) {
+		if (getCurrentAbsoluteUrl().contains("index.htm")) {
 			throw new IllegalStateException("Server did not start up properly. UI modules are not running.");
 		}
 
