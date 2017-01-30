@@ -8,6 +8,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.Response;
+
 public class LoginPage extends Page {
 
 	public static final String LOGIN_PATH = "/login.htm";
@@ -46,7 +49,8 @@ public class LoginPage extends Page {
 	@java.lang.Override
 	public void waitForPage() {
 		if (getCurrentAbsoluteUrl().contains("index.htm")) {
-			throw new IllegalStateException("Server did not start up properly. UI modules are not running.");
+			System.out.println("Server did not start up properly. UI modules are not running.");
+			throw new ServerErrorException("Server did not start up properly. UI modules are not running.", Response.Status.SERVICE_UNAVAILABLE);
 		}
 
 		super.waitForPage();

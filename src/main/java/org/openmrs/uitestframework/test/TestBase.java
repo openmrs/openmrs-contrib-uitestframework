@@ -196,33 +196,33 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 		long start = System.currentTimeMillis();
 		//instead of 'while(true)' to prevent infinite loop
-		while(System.currentTimeMillis() < start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
+		while(true){
 			try{
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
-				break;
+				return;
 			} catch(ServerErrorException e) {
-				System.out.println ("Test suite killed due to server failure in " + testMethod);
+				System.out.println("Test suite killed due to server failure in " + testMethod);
 				ExceptionUtils.printRootCauseStackTrace(e);
 				System.exit(1);
 			} catch (ProcessingException e) {
-				System.out.println ("Test suite killed due to server failure in " + testMethod);
-				ExceptionUtils.printRootCauseStackTrace(e);
-				System.exit(1);
-			} catch (IllegalStateException e) {
-				System.out.println ("Test suite killed due to server failure in " + testMethod);
+				System.out.println("Test suite killed due to server failure in " + testMethod);
 				ExceptionUtils.printRootCauseStackTrace(e);
 				System.exit(1);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
-					throw new RuntimeException("Failed to login to the testing server for " + MAX_SERVER_STARTUP_IN_MILLISECONDS + " milliseconds in " + testMethod, e);
+					System.out.println("Test suite killed due to failing to login in " + testMethod);
+					ExceptionUtils.printRootCauseStackTrace(e);
+					System.exit(1);
 				} else {
 					//log that connection timed out, and try again in next iteration
-					System.out.println("Failed to login to the testing server in " + testMethod + ", trying again...");
+					System.out.println("Failed to login in " + testMethod + ", trying again...");
 				}
 			}
 		}
+
+
 	}
 
 	@After
@@ -256,6 +256,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		loginPage.go();
 		//refresh, just to be sure all css files and images are loaded properly
 		driver.navigate().refresh();
+
 		loginPage.waitForPage();
 
 		return loginPage;
