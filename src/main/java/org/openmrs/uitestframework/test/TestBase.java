@@ -234,7 +234,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	@After
 	public void stopWebDriver() {
-		if (!serverFailure) {
+		if (driver != null) {
 			driver.quit();
 		}
 	}
