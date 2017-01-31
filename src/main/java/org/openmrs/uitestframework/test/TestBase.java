@@ -18,7 +18,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -40,6 +39,7 @@ import org.junit.runners.Parameterized;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
+import org.openmrs.uitestframework.page.exception.PageRejectedException;
 import org.openmrs.uitestframework.test.TestData.EncounterInfo;
 import org.openmrs.uitestframework.test.TestData.PatientInfo;
 import org.openmrs.uitestframework.test.TestData.RoleInfo;
@@ -195,7 +195,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
-		//instead of 'while(true)' to prevent infinite loop
 		while(true){
 			try{
 				page = login();
@@ -203,26 +202,26 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//and interpret no exception as successful connection
 				return;
 			} catch(ServerErrorException e) {
-				System.out.println("Test suite killed due to server failure in " + testMethod);
-				ExceptionUtils.printRootCauseStackTrace(e);
-				System.exit(1);
+				killTestSuite(testMethod, e);
+			} catch (PageRejectedException e) {
+				killTestSuite(testMethod, e);
 			} catch (ProcessingException e) {
-				System.out.println("Test suite killed due to server failure in " + testMethod);
-				ExceptionUtils.printRootCauseStackTrace(e);
-				System.exit(1);
+				killTestSuite(testMethod, e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
-					System.out.println("Test suite killed due to failing to login in " + testMethod);
-					ExceptionUtils.printRootCauseStackTrace(e);
-					System.exit(1);
+					killTestSuite(testMethod, e);
 				} else {
 					//log that connection timed out, and try again in next iteration
 					System.out.println("Failed to login in " + testMethod + ", trying again...");
 				}
 			}
 		}
+	}
 
-
+	private void killTestSuite(String testMethod, Exception e) {
+		System.out.println("Test suite killed due to server failure in " + testMethod);
+		ExceptionUtils.printRootCauseStackTrace(e);
+		System.exit(1);
 	}
 
 	@After
@@ -246,7 +245,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				.path(loginPage.getPageUrl())
 				.request().get();
 
-
 		int status = response.getStatus();
 
 		if(status >= 400 && status <= 599){
@@ -254,9 +252,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 
 		loginPage.go();
+		loginPage.waitForPage();
+
 		//refresh, just to be sure all css files and images are loaded properly
 		driver.navigate().refresh();
-
 		loginPage.waitForPage();
 
 		return loginPage;

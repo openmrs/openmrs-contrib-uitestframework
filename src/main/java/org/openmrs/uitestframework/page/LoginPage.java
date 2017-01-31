@@ -46,16 +46,6 @@ public class LoginPage extends Page {
 		goToPage(LOGOUT_PATH);
 	}
 
-	@java.lang.Override
-	public void waitForPage() {
-		if (getCurrentAbsoluteUrl().contains("index.htm")) {
-			System.out.println("Server did not start up properly. UI modules are not running.");
-			throw new ServerErrorException("Server did not start up properly. UI modules are not running.", Response.Status.SERVICE_UNAVAILABLE);
-		}
-
-		super.waitForPage();
-	}
-
 	public Page login(String user, String password, Integer location) {
 		postLoginForm(user, password, location);
 		return this;
@@ -104,6 +94,11 @@ public class LoginPage extends Page {
 	@Override
 	public String getPageUrl() {
 		return LOGIN_PATH;
+	}
+
+	@Override
+	public String getPageRejectUrl() {
+		return "index.htm";
 	}
 
 	public Page loginAsClerk() {

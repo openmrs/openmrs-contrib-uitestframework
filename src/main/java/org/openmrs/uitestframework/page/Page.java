@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.uitestframework.page.exception.PageRejectedException;
 import org.openmrs.uitestframework.test.TestBase;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -38,6 +39,12 @@ public abstract class Page {
 	private final ExpectedCondition<Boolean> pageReady = new ExpectedCondition<Boolean>() {
 
 		public Boolean apply(WebDriver driver) {
+			if (getPageRejectUrl() != null) {
+				if (driver.getCurrentUrl().contains(getPageRejectUrl())) {
+					return true;
+				}
+			}
+
 			if (!driver.getCurrentUrl().contains(getPageUrl())) {
 				if (getPageAliasUrl() != null) {
 					if (!driver.getCurrentUrl().contains(getPageAliasUrl())) {
@@ -113,6 +120,12 @@ public abstract class Page {
 
 	public void waitForPage() {
 		waiter.until(pageReady);
+
+		if (getPageRejectUrl() != null) {
+			if (driver.getCurrentUrl().contains(getPageRejectUrl())) {
+				throw new PageRejectedException(getPageRejectUrl());
+			}
+		}
 	}
 
 	public String newContextPageUrl(String pageUrl) {
@@ -235,6 +248,8 @@ public abstract class Page {
 	public String getPageAliasUrl() {
 		return null;
 	}
+
+	public String getPageRejectUrl() { return null; }
 
 	public String getContextPageUrl() {
 		return newContextPageUrl(getPageUrl());
