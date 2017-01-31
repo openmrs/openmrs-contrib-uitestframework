@@ -123,7 +123,7 @@ public abstract class Page {
 
 		if (getPageRejectUrl() != null) {
 			if (driver.getCurrentUrl().contains(getPageRejectUrl())) {
-				throw new PageRejectedException(getPageRejectUrl());
+				throw new PageRejectedException("Page url " + driver.getCurrentUrl() + " contains '" + getPageRejectUrl() + "', which is not allowed");
 			}
 		}
 	}

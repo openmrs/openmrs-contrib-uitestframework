@@ -1,6 +1,7 @@
 package org.openmrs.uitestframework.test;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
 
 import java.io.File;
@@ -122,6 +123,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		});
 	}
 
+	private static transient boolean serverFailure = false;
+
 	public TestBase() {
 		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
 		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
@@ -141,6 +144,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	@Before
 	public void startWebDriver() throws Exception {
+		if (serverFailure) {
+			fail("Test killed due to server failure");
+		}
+
 		String testMethod = getClass().getSimpleName() + "." + testName.getMethodName();
 		if (isRunningOnSauceLabs()) {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
@@ -202,14 +209,14 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				//and interpret no exception as successful connection
 				return;
 			} catch(ServerErrorException e) {
-				killTestSuite(testMethod, e);
+				failTest(testMethod, e);
 			} catch (PageRejectedException e) {
-				killTestSuite(testMethod, e);
+				failTest(testMethod, e);
 			} catch (ProcessingException e) {
-				killTestSuite(testMethod, e);
+				failTest(testMethod, e);
 			} catch(Exception e){
 				if(System.currentTimeMillis() > start + MAX_SERVER_STARTUP_IN_MILLISECONDS){
-					killTestSuite(testMethod, e);
+					failTest(testMethod, e);
 				} else {
 					//log that connection timed out, and try again in next iteration
 					System.out.println("Failed to login in " + testMethod + ", trying again...");
@@ -218,10 +225,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 	}
 
-	private void killTestSuite(String testMethod, Exception e) {
-		System.out.println("Test suite killed due to server failure in " + testMethod);
+	private void failTest(String testMethod, Exception e) {
+		serverFailure = true;
+		System.out.println("Test killed due to server failure in " + testMethod);
 		ExceptionUtils.printRootCauseStackTrace(e);
-		System.exit(1);
+		fail("Test killed due to server failure");
 	}
 
 	@After
