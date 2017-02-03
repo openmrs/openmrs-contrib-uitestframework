@@ -126,10 +126,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	private static volatile boolean serverFailure = false;
 
-	private static final Object countDownLatchLock = new Object();
-
-	private static volatile CountDownLatch countDownLatch;
-
 	public TestBase() {
 		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
 		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
@@ -209,19 +205,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		long start = System.currentTimeMillis();
 		while(true) {
 			try {
-				//allow for only 1 test to initiate server upgrade
-				synchronized (countDownLatchLock) {
-					if (countDownLatch == null) {
-						countDownLatch = new CountDownLatch(1);
-						System.out.println("Triggering server update...");
-					} else {
-						countDownLatch.await(120, TimeUnit.SECONDS);
-					}
-				}
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
-				countDownLatch.countDown();
 				return;
 			} catch(ServerErrorException e) {
 				failTest(testMethod, e);
