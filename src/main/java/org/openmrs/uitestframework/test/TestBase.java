@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -123,7 +124,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		});
 	}
 
-	private static transient boolean serverFailure = false;
+	private static volatile boolean serverFailure = false;
+
+	private static final Object countDownLatchLock = new Object();
+
+	private static volatile CountDownLatch countDownLatch;
 
 	public TestBase() {
 		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
@@ -202,11 +207,20 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
-		while(true){
-			try{
+		while(true) {
+			try {
+				//allow for only 1 test to initiate server upgrade
+				synchronized (countDownLatchLock) {
+					if (countDownLatch == null) {
+						countDownLatch = new CountDownLatch(1);
+					} else {
+						countDownLatch.await(120, TimeUnit.SECONDS);
+					}
+				}
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
+				countDownLatch.countDown();
 				return;
 			} catch(ServerErrorException e) {
 				failTest(testMethod, e);
