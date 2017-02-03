@@ -213,6 +213,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				synchronized (countDownLatchLock) {
 					if (countDownLatch == null) {
 						countDownLatch = new CountDownLatch(1);
+						System.out.println("Triggering server update...");
 					} else {
 						countDownLatch.await(120, TimeUnit.SECONDS);
 					}
