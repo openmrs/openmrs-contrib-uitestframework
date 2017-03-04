@@ -599,7 +599,7 @@ public class TestData {
 	
 	public static void permanetDelete(String uuid){
 		
-		if(null != uuid && !uuid.isEmpty()){
+		if(null != uuid && StringUtils.isNotBlank(uuid)){
 			RestClient.delete(uuid, true);
 		}	
 	}
