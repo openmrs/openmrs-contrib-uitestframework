@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -113,7 +112,13 @@ public class TestData {
 
 	}
 
+	/**
+	 * https://wiki.openmrs.org/display/docs/REST+Web+Service+Resources+in+OpenMRS+1.9#RESTWebServiceResourcesinOpenMRS1.9-Location
+	 */
 	public static class TestLocation extends JsonTestClass {
+
+		public String name;
+		public List<String> tags;
 
 		public TestLocation(String name) {
 			this.name = name;
@@ -124,9 +129,6 @@ public class TestData {
 			this.name = name;
 			this.tags = tags;
 		}
-
-		public String name;
-		public List<String> tags;
 
 		@Override
 		public String name() {
@@ -574,6 +576,32 @@ public class TestData {
 		person.uuid = tp.create();
 		person.id = getPersonId(person.uuid);
 		return person.uuid;
+	}
+	
+	/**
+	 *Create a location without tags
+	 *
+	 * @param locationName the name of the location
+	 * @return the location's uuid
+	 */
+	
+	public static String createLocation(String locationName){
+		
+		TestLocation testLocation = new TestLocation(locationName);
+		return testLocation.create();
+	}
+	/**
+	 * Delete a resource permanently
+	 * 
+	 * @param uuid of the resource
+	 */
+	
+	
+	public static void permanetDelete(String uuid){
+		
+		if(null != uuid && !uuid.isEmpty()){
+			RestClient.delete(uuid, true);
+		}	
 	}
 
 	public static final String BDAY_SEP = "-";
