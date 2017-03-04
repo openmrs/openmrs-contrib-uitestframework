@@ -584,19 +584,17 @@ public class TestData {
 	 * @param locationName the name of the location
 	 * @return the location's uuid
 	 */
-	
 	public static String createLocation(String locationName){
 		
 		TestLocation testLocation = new TestLocation(locationName);
 		return testLocation.create();
 	}
+
 	/**
 	 * Delete a resource permanently
 	 * 
 	 * @param uuid of the resource
 	 */
-	
-	
 	public static void permanetDelete(String uuid){
 		
 		if(StringUtils.isNotBlank(uuid)){
