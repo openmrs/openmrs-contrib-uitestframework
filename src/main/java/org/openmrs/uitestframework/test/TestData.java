@@ -505,7 +505,7 @@ public class TestData {
 		public String uuid;
 	}
 	
-	public static PersonInfo generatePerson() {
+	public static PersonInfo generateRandomPerson() {
 		return generateRandomPerson(new PersonInfo());
 	}
 
