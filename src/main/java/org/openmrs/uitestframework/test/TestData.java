@@ -559,7 +559,7 @@ public class TestData {
 	}
 
 	static String randomSuffix(int digits) {
-		return "" + Math.round(Math.random() * Math.pow(10, digits)));
+		return "" + Math.round(Math.random() * Math.pow(10, digits));
 	}
 
 	/**
