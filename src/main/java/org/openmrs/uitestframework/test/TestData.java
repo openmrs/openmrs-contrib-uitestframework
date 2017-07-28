@@ -505,7 +505,7 @@ public class TestData {
 		public String uuid;
 	}
 	
-	public static PersonInfo generateRandomPerson() {
+	public static PersonInfo generatePerson() {
 		return generateRandomPerson(new PersonInfo());
 	}
 
@@ -559,7 +559,7 @@ public class TestData {
 	}
 
 	static String randomSuffix(int digits) {
-		return ((Integer) Math.round(Math.random() * Math.pow(10, digits))).toString();
+		return "" + Math.round(Math.random() * Math.pow(10, digits)));
 	}
 
 	/**
