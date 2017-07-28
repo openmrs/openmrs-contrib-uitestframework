@@ -559,9 +559,7 @@ public class TestData {
 	}
 
 	static String randomSuffix(int digits) {
-		// Last n digits of the current time.
-		return StringUtils.right(String.valueOf(System.currentTimeMillis()),
-				digits);
+		return ((Integer) Math.round(Math.random() * Math.pow(10, digits))).toString();
 	}
 
 	/**
