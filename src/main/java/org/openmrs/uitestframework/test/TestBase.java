@@ -77,10 +77,10 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
 @RunWith(Parameterized.class)
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
-	public static final int MAX_WAIT_IN_SECONDS = 120;
-	public static final int MAX_PAGE_LOAD_IN_SECONDS = 120;
+	public static final int MAX_WAIT_IN_SECONDS = 240;
+	public static final int MAX_PAGE_LOAD_IN_SECONDS = 240;
 	public static final int MAX_SERVER_STARTUP_IN_MILLISECONDS = 10 * 60 * 1000;
-	public static final int MAX_SAUCELAB_COMMAND_TIMEOUT_IN_SECONDS = 600;
+	public static final int MAX_SAUCELAB_COMMAND_TIMEOUT_IN_SECONDS = 1200;
 
 	public String sessionId;
 
