@@ -368,12 +368,12 @@ public abstract class Page {
 	public List<String> getValidationErrors(){
 		waitForPage();
 		List<String> validationErrors = new ArrayList<String>();
-		for(WebElement webElement: driver.findElements(By.className("error"))){
+		for(WebElement webElement: driver.findElements(By.className("field-error"))){
 			if (StringUtils.isNotBlank(webElement.getText())) {
 				validationErrors.add(webElement.getText());
 			}
 		}
-		for(WebElement webElement: driver.findElements(By.className("field-error"))){
+		for(WebElement webElement: driver.findElements(By.className("error"))){
 			if (StringUtils.isNotBlank(webElement.getText())) {
 				validationErrors.add(webElement.getText());
 			}
