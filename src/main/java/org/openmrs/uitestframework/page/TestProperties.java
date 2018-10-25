@@ -40,7 +40,7 @@ public class TestProperties {
 
 	public static final String WEBAPP_URL_PROPERTY = "webapp.url";
 
-	public static final String DEFAULT_WEBAPP_URL = "http://localhost:8080/openmrs";
+	public static final String DEFAULT_WEBAPP_URL = "http://sync1.openmrs.org/openmrs";
 
 	private static TestProperties SINGLETON;
 

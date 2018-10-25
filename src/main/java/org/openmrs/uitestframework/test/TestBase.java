@@ -2,6 +2,7 @@ package org.openmrs.uitestframework.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.openmrs.uitestframework.page.TestProperties.DEFAULT_WEBAPP_URL;
 import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
 
 import java.io.File;
@@ -203,9 +204,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
+		driver.get(DEFAULT_WEBAPP_URL);
 		while(true) {
 			try {
-				page = login();
+//				login()
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
 				//and interpret no exception as successful connection
 				return;
@@ -224,6 +226,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				}
 			}
 		}
+
 	}
 
 	private void failTest(String testMethod, Exception e) {
@@ -250,25 +253,20 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public LoginPage goToLoginPage() {
 		LoginPage loginPage = getLoginPage();
-
 		Response response = ClientBuilder.newClient()
 				.target(TestProperties.instance().getWebAppUrl())
 				.path(loginPage.getPageUrl())
 				.request().get();
 
 		int status = response.getStatus();
-
 		if(status >= 400 && status <= 599){
 			throw new ServerErrorException(response.getStatusInfo().getReasonPhrase(), status);
 		}
-
 		loginPage.go();
 		loginPage.waitForPage();
-
 		//refresh, just to be sure all css files and images are loaded properly
 		driver.navigate().refresh();
 		loginPage.waitForPage();
-
 		return loginPage;
 	}
 
@@ -277,8 +275,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	WebDriver setupFirefoxDriver() {
+		System.setProperty("webdriver.gecko.driver", "src/main/resources/geckodriver/geckodriver");
 		DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
+		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.DISMISS);
 		driver = new FirefoxDriver(desiredCapabilities);
 		return driver;
 	}
