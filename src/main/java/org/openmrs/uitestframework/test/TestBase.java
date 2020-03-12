@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -149,7 +148,12 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			fail("Test killed due to server failure");
 		}
 
+		launchBrowser();
+	}
+
+	public void launchBrowser()  throws Exception {
 		String testMethod = getClass().getSimpleName() + "." + testName.getMethodName();
+		final TestProperties properties = TestProperties.instance();
 		if (isRunningOnSauceLabs()) {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
 
@@ -183,7 +187,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			System.out.println("Running " + testMethod + " at https://saucelabs.com/tests/" + this.sessionId);
 		} else {
 			System.out.println("Running locally...");
-			final TestProperties properties = TestProperties.instance();
 			final TestProperties.WebDriverType webDriverType = properties.getWebDriver();
 			switch (webDriverType) {
 				case chrome:
@@ -203,7 +206,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
-		while(true) {
+		while(properties.automaticallyLoginAtStartup()) {
 			try {
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS

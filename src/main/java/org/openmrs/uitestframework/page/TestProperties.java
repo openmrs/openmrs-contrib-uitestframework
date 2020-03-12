@@ -42,6 +42,8 @@ public class TestProperties {
 
 	public static final String DEFAULT_WEBAPP_URL = "http://localhost:8080/openmrs";
 
+	public static final String AUTO_LOGIN_AT_STARTUP = "login.auto";
+
 	private static TestProperties SINGLETON;
 
 	private Properties properties;
@@ -78,6 +80,10 @@ public class TestProperties {
 
 	public String getPassword() {
 		return getProperty(LOGIN_PASSWORD_PROPERTY, DEFAULT_PASSWORD);
+	}
+
+	public boolean automaticallyLoginAtStartup() {
+		return Boolean.parseBoolean(getProperty(AUTO_LOGIN_AT_STARTUP, "true"));
 	}
 
 	public enum WebDriverType {
