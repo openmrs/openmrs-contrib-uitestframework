@@ -115,14 +115,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	@Parameterized.Parameter(value = 2)
 	public String browserVersion;
 
-	@Parameterized.Parameters(name = "{index}: {0} {1} {2}")
-	public static Collection<Object[]> getBrowsers() {
-		return Arrays.asList(new Object[][] {
-				{"Linux", "Firefox", "42"},
-				{"Linux", "Chrome", "48.0"}
-		});
-	}
-
 	private static volatile boolean serverFailure = false;
 
 	public TestBase() {
@@ -288,7 +280,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	WebDriver setupChromeDriver() {
 		URL chromedriverExecutable = null;
-		ClassLoader classLoader = TestBase.class.getClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		String chromedriverExecutableFilename = null;
 		if (SystemUtils.IS_OS_MAC_OSX) {
