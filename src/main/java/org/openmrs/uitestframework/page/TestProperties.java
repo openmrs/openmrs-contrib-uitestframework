@@ -44,6 +44,10 @@ public class TestProperties {
 
 	public static final String AUTO_LOGIN_AT_STARTUP_PROPERTY = "login.auto";
 
+	public static final String LOGIN_LOCATION_PROPERTY = "login.location";
+
+	public static final String DEFAULT_LOGIN_LOCATION = "Outpatient Clinic";
+
 	private static TestProperties SINGLETON;
 
 	private Properties properties;
@@ -80,6 +84,10 @@ public class TestProperties {
 
 	public String getPassword() {
 		return getProperty(LOGIN_PASSWORD_PROPERTY, DEFAULT_PASSWORD);
+	}
+
+	public String getLocation() {
+		return getProperty(LOGIN_LOCATION_PROPERTY, DEFAULT_LOGIN_LOCATION);
 	}
 
 	public boolean automaticallyLoginAtStartup() {

@@ -198,7 +198,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
-		while(properties.automaticallyLoginAtStartup()) {
+		boolean autoLoginAtStart = properties.automaticallyLoginAtStartup();
+		while(autoLoginAtStart) {
 			try {
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
