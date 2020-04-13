@@ -53,6 +53,7 @@ import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -333,7 +334,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-"
 		        + getClass().getSimpleName() + ".log");
-		driver = new ChromeDriver();
+		ChromeOptions chromeOptions = new ChromeOptions();
+		if("true".equals(TestProperties.instance().getHeadless())) {
+			chromeOptions.addArguments("--headless");
+		}
+		driver = new ChromeDriver(chromeOptions);
 		return driver;
 	}
 

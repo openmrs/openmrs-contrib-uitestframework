@@ -1,5 +1,6 @@
 package org.openmrs.uitestframework.page;
 
+import javax.xml.bind.annotation.XmlType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,6 +49,10 @@ public class TestProperties {
 
 	public static final String DEFAULT_LOGIN_LOCATION = "Outpatient Clinic";
 
+	public static final String HEADLESS_PROPERTY = "headless";
+
+	public static final String DEFAULT_HEADLESS = "false";
+
 	private static TestProperties SINGLETON;
 
 	private Properties properties;
@@ -90,6 +95,9 @@ public class TestProperties {
 		return getProperty(LOGIN_LOCATION_PROPERTY, DEFAULT_LOGIN_LOCATION);
 	}
 
+	public String getHeadless() {
+		return getProperty(HEADLESS_PROPERTY, DEFAULT_HEADLESS);
+	}
 	public boolean automaticallyLoginAtStartup() {
 		return Boolean.parseBoolean(getProperty(AUTO_LOGIN_AT_STARTUP_PROPERTY, "true"));
 	}
