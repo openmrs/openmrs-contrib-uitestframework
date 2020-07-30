@@ -8,9 +8,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
-
 public class LoginPage extends Page {
 
 	public static final String LOGIN_PATH = "/login.htm";

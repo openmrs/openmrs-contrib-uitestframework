@@ -1,6 +1,5 @@
 package org.openmrs.uitestframework.page;
 
-import javax.xml.bind.annotation.XmlType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -127,5 +126,9 @@ public class TestProperties {
 			value = defaultValue;
 		}
 		return value;
+	}
+
+	public String getFirefoxDriverLocation() {
+		return getProperty("webdriver.gecko.driver", null);
 	}
 }

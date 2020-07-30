@@ -1,24 +1,13 @@
 package org.openmrs.uitestframework.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import com.saucelabs.common.SauceOnDemandAuthentication;
+import com.saucelabs.common.SauceOnDemandSessionIdProvider;
+import com.saucelabs.junit.SauceOnDemandTestWatcher;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -41,16 +30,8 @@ import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
 import org.openmrs.uitestframework.page.exception.PageRejectedException;
-import org.openmrs.uitestframework.test.TestData.EncounterInfo;
-import org.openmrs.uitestframework.test.TestData.PatientInfo;
-import org.openmrs.uitestframework.test.TestData.RoleInfo;
-import org.openmrs.uitestframework.test.TestData.TestPatient;
-import org.openmrs.uitestframework.test.TestData.UserInfo;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.UnexpectedAlertBehaviour;
-import org.openqa.selenium.WebDriver;
+import org.openmrs.uitestframework.test.TestData.*;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -59,9 +40,15 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.saucelabs.common.SauceOnDemandAuthentication;
-import com.saucelabs.common.SauceOnDemandSessionIdProvider;
-import com.saucelabs.junit.SauceOnDemandTestWatcher;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.openmrs.uitestframework.test.TestData.*;
 
 /**
  * Superclass for all UI Tests. Contains lots of handy "utilities" needed to setup and tear down
@@ -119,9 +106,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	private static volatile boolean serverFailure = false;
 
 	public TestBase() {
-		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
-		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
-		sauceLabsHubUrl = TestProperties.instance().getProperty("saucelabs.hub.url", "ondemand.saucelabs.com:80");
+		TestProperties testProperties = TestProperties.instance();
+		String sauceLabsUsername = testProperties.getProperty("SAUCELABS_USERNAME", null);
+		String sauceLabsAccessKey = testProperties.getProperty("SAUCELABS_ACCESSKEY", null);
+		sauceLabsHubUrl = testProperties.getProperty("saucelabs.hub.url", "ondemand.saucelabs.com:80");
 
 		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
@@ -274,6 +262,9 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	WebDriver setupFirefoxDriver() {
+		if(StringUtils.isBlank(System.getProperty("webdriver.gecko.driver"))) {
+			System.setProperty("webdriver.gecko.driver", Thread.currentThread().getContextClassLoader().getResource(TestProperties.instance().getFirefoxDriverLocation()).getPath());
+		}
 		DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
 		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
 		driver = new FirefoxDriver(desiredCapabilities);
