@@ -25,12 +25,12 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>4.0.0-alpha-6</version>
+			<version>4.0.0-alpha-7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

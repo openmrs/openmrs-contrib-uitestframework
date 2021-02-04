@@ -24,8 +24,6 @@ import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
@@ -61,7 +59,6 @@ import static org.openmrs.uitestframework.test.TestData.*;
  *     <li>@see {@link #assertPage(Page)} - @see {@link #pageContent()}</li>
  * </ul>
  */
-@RunWith(Parameterized.class)
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_IN_SECONDS = 120;
@@ -93,15 +90,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	protected WebDriver driver;
 
 	protected Page page;
-
-	@Parameterized.Parameter
-	public String platform;
-
-	@Parameterized.Parameter(value = 1)
-	public String browser;
-
-	@Parameterized.Parameter(value = 2)
-	public String browserVersion;
 
 	private static volatile boolean serverFailure = false;
 
@@ -137,10 +125,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		final TestProperties properties = TestProperties.instance();
 		if (isRunningOnSauceLabs()) {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
-
-			capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
-			capabilities.setCapability(CapabilityType.VERSION, browserVersion);
-			capabilities.setCapability(CapabilityType.PLATFORM, platform);
 
 			capabilities.setCapability("name", testMethod);
 
@@ -343,7 +327,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	public void takeScreenshot(String filename) {
-		if (!isRunningOnSauceLabs()) {
+		if (!isRunningOnSauceLabs() && driver != null) {
 			File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 			try {
 				FileUtils.copyFile(tempFile, new File("target/screenshots/" + filename + ".png"));
