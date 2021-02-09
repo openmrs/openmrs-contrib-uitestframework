@@ -40,7 +40,7 @@ public class LoginPage extends Page {
 
 	@Override
 	public void go() {
-		goToPage(LOGOUT_PATH);
+		goToPage(LOGIN_PATH);
 	}
 
 	public Page login(String user, String password, Integer location) {
