@@ -20,8 +20,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.collect.Iterables;
-
 /**
  * A superclass for "real" pages. Has lots of handy methods for accessing elements, clicking,
  * filling fields. etc.
@@ -198,11 +196,6 @@ public abstract class Page {
 	public void clickOn(By by) {
 		findElement(by).click();
 	}
-	
-	public void clickOnLast(By by) {
-		Iterables.getLast(findElements(by)).click();
-	}
-
 
 	public void selectFrom(By by, String value) {
 		Select droplist = new Select(findElement(by));
