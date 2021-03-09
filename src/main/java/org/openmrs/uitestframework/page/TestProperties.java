@@ -101,13 +101,17 @@ public class TestProperties {
 		return Boolean.parseBoolean(getProperty(AUTO_LOGIN_AT_STARTUP_PROPERTY, "true"));
 	}
 
+	public String getBrowser() {
+		return getProperty(WEBDRIVER_PROPERTY, DEFAULT_WEBDRIVER);
+	}
+
 	public enum WebDriverType {
 		chrome, firefox
 	}; // only these two for now
 
 	public WebDriverType getWebDriver() {
 		try {
-			return WebDriverType.valueOf(getProperty(WEBDRIVER_PROPERTY, DEFAULT_WEBDRIVER));
+			return WebDriverType.valueOf(getBrowser());
 		}
 		catch (IllegalArgumentException e) {
 			return WebDriverType.firefox;

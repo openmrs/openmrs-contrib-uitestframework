@@ -34,6 +34,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -145,6 +146,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				capabilities.setCapability("tags", branch);
 			}
 
+			if(TestProperties.DEFAULT_WEBDRIVER.equals(properties.getBrowser())) {
+				capabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
+			}
+
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
@@ -249,9 +254,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		if(StringUtils.isBlank(System.getProperty("webdriver.gecko.driver"))) {
 			System.setProperty("webdriver.gecko.driver", Thread.currentThread().getContextClassLoader().getResource(TestProperties.instance().getFirefoxDriverLocation()).getPath());
 		}
-		DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
-		driver = new FirefoxDriver(desiredCapabilities);
+		FirefoxOptions firefoxOptions = new FirefoxOptions();
+		if("true".equals(TestProperties.instance().getHeadless())) {
+			firefoxOptions.addArguments("--headless");
+		}
+		driver = new FirefoxDriver(firefoxOptions);
 		return driver;
 	}
 
