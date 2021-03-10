@@ -2,9 +2,11 @@ package org.openmrs.uitestframework.page;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.uitestframework.page.exception.PageRejectedException;
 import org.openmrs.uitestframework.test.TestBase;
@@ -95,7 +97,7 @@ public abstract class Page {
 			throw new IllegalArgumentException("webapp.url " + properties.getWebAppUrl() + " is not a valid URL", e);
 		}
 
-		waiter = new WebDriverWait(driver, TestBase.MAX_WAIT_IN_SECONDS);
+		waiter = new WebDriverWait(driver, Duration.ofSeconds(TestBase.MAX_WAIT_IN_SECONDS));
 	}
 
 	/**
@@ -153,7 +155,6 @@ public abstract class Page {
 	}
 
 	public WebElement findElement(By by) {
-		waitForPage();
 		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
 
 		return driver.findElement(by);
@@ -197,6 +198,10 @@ public abstract class Page {
 		findElement(by).click();
 	}
 
+	public void clickOnLast(By by) {
+		Iterables.getLast(findElements(by)).click();
+	}
+
 	public void selectFrom(By by, String value) {
 		Select droplist = new Select(findElement(by));
 		droplist.selectByVisibleText(value);
@@ -221,14 +226,12 @@ public abstract class Page {
 	}
 
 	public List<WebElement> findElements(By by) {
-		waitForPage();
 		waiter.until(ExpectedConditions.presenceOfElementLocated(by));
 
 		return driver.findElements(by);
 	}
 
 	public void waitForStalenessOf(WebElement webElement) {
-		waitForPage();
 		waiter.until(ExpectedConditions.stalenessOf(webElement));
 	}
 
@@ -238,8 +241,6 @@ public abstract class Page {
 	public abstract String getPageUrl();
 
 	public String getPatientUuidFromUrl() {
-		waitForPage();
-
 		String url = driver.getCurrentUrl();
 
 		return StringUtils.substringBefore(StringUtils.substringAfter(url, "patientId="), "&");
@@ -269,8 +270,6 @@ public abstract class Page {
 	}
 
 	public void waitForFocusById(final String id) {
-		waitForPage();
-
 		waiter.until(new ExpectedCondition<Boolean>() {
 
 			@Override
@@ -281,8 +280,6 @@ public abstract class Page {
 	}
 
 	public void waitForFocusByCss(final String tag, final String attr, final String value) {
-		waitForPage();
-
 		waiter.until(new ExpectedCondition<Boolean>() {
 
 			@Override
@@ -293,8 +290,6 @@ public abstract class Page {
 	}
 
 	public void waitForJsVariable(final String varName) {
-		waitForPage();
-
 		waiter.until(new ExpectedCondition<Boolean>() {
 
 			@Override
@@ -306,14 +301,10 @@ public abstract class Page {
 	}
 
 	public void waitForElementToBeHidden(By by) {
-		waitForPage();
-
 		waiter.until(ExpectedConditions.invisibilityOfElementLocated(by));
 	}
 
 	public void waitForElementToBeEnabled(By by) {
-		waitForPage();
-
 		waiter.until(ExpectedConditions.elementToBeClickable(by));
 	}
 
@@ -324,22 +315,16 @@ public abstract class Page {
 	}
 
 	boolean hasFocus(String id) {
-		waitForPage();
-
 		return (Boolean) ((JavascriptExecutor) driver).executeScript("return jQuery('#" + id + "').is(':focus')",
 		    new Object[] {});
 	}
 
 	boolean hasFocus(String tag, String attr, String value) {
-		waitForPage();
-
 		return (Boolean) ((JavascriptExecutor) driver)
 		        .executeScript("return jQuery('" + tag + "[" + attr + "=" + value + "]').is(':focus')", new Object[] {});
 	}
 
 	public void waitForElement(By by) {
-		waitForPage();
-
 		waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
 	}
 
@@ -350,8 +335,6 @@ public abstract class Page {
 	}
 
 	public void waitForTextToBePresentInElement(By by, String text) {
-		waitForPage();
-
 		waiter.until(ExpectedConditions.textToBePresentInElementLocated(by, text));
 	}
 
@@ -360,13 +343,10 @@ public abstract class Page {
 	}
 
 	public Boolean containsText(String text) {
-		waitForPage();
-
 		return driver.getPageSource().contains(text);
 	}
 
 	public List<String> getValidationErrors(){
-		waitForPage();
 		List<String> validationErrors = new ArrayList<String>();
 		for(WebElement webElement: driver.findElements(By.className("error"))){
 			if (StringUtils.isNotBlank(webElement.getText())) {

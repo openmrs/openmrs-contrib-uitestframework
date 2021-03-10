@@ -16,3 +16,4 @@
 # eclipse
 .project
 .settings
+.classpath

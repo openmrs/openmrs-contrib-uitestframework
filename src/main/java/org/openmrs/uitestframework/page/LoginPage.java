@@ -8,9 +8,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
-
 public class LoginPage extends Page {
 
 	public static final String LOGIN_PATH = "/login.htm";
@@ -43,7 +40,7 @@ public class LoginPage extends Page {
 
 	@Override
 	public void go() {
-		goToPage(LOGOUT_PATH);
+		goToPage(LOGIN_PATH);
 	}
 
 	public Page login(String user, String password, Integer location) {

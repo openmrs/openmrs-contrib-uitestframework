@@ -1,21 +1,19 @@
 package org.openmrs.uitestframework.test;
 
-import java.io.IOException;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-
-import org.glassfish.jersey.client.filter.HttpBasicAuthFilter;
-import org.openmrs.uitestframework.page.TestProperties;
-import org.openmrs.uitestframework.test.TestData.JsonTestClass;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.openmrs.uitestframework.page.TestProperties;
+import org.openmrs.uitestframework.test.TestData.JsonTestClass;
+
+import java.io.IOException;
 
 public class RestClient {
 
@@ -87,7 +85,7 @@ public class RestClient {
 	}
 
 	private static Client newClient() {
-		return ClientBuilder.newClient().register(new HttpBasicAuthFilter(getUsername(), getPassword()));
+		return ClientBuilder.newClient().register(HttpAuthenticationFeature.basic(getUsername(), getPassword()));
 	}
 
 	static String getUsername() {

@@ -1,25 +1,13 @@
 package org.openmrs.uitestframework.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.openmrs.uitestframework.test.TestData.checkIfPatientExists;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import com.saucelabs.common.SauceOnDemandAuthentication;
+import com.saucelabs.common.SauceOnDemandSessionIdProvider;
+import com.saucelabs.junit.SauceOnDemandTestWatcher;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -36,32 +24,30 @@ import org.junit.rules.TestName;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openmrs.uitestframework.page.LoginPage;
 import org.openmrs.uitestframework.page.Page;
 import org.openmrs.uitestframework.page.TestProperties;
 import org.openmrs.uitestframework.page.exception.PageRejectedException;
-import org.openmrs.uitestframework.test.TestData.EncounterInfo;
-import org.openmrs.uitestframework.test.TestData.PatientInfo;
-import org.openmrs.uitestframework.test.TestData.RoleInfo;
-import org.openmrs.uitestframework.test.TestData.TestPatient;
-import org.openmrs.uitestframework.test.TestData.UserInfo;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.UnexpectedAlertBehaviour;
-import org.openqa.selenium.WebDriver;
+import org.openmrs.uitestframework.test.TestData.*;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.saucelabs.common.SauceOnDemandAuthentication;
-import com.saucelabs.common.SauceOnDemandSessionIdProvider;
-import com.saucelabs.junit.SauceOnDemandTestWatcher;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.openmrs.uitestframework.test.TestData.*;
 
 /**
  * Superclass for all UI Tests. Contains lots of handy "utilities" needed to setup and tear down
@@ -74,7 +60,6 @@ import com.saucelabs.junit.SauceOnDemandTestWatcher;
  *     <li>@see {@link #assertPage(Page)} - @see {@link #pageContent()}</li>
  * </ul>
  */
-@RunWith(Parameterized.class)
 public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	public static final int MAX_WAIT_IN_SECONDS = 120;
@@ -107,29 +92,13 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
 	protected Page page;
 
-	@Parameterized.Parameter
-	public String platform;
-
-	@Parameterized.Parameter(value = 1)
-	public String browser;
-
-	@Parameterized.Parameter(value = 2)
-	public String browserVersion;
-
-	@Parameterized.Parameters(name = "{index}: {0} {1} {2}")
-	public static Collection<Object[]> getBrowsers() {
-		return Arrays.asList(new Object[][] {
-				{"Linux", "Firefox", "42"},
-				{"Linux", "Chrome", "48.0"}
-		});
-	}
-
 	private static volatile boolean serverFailure = false;
 
 	public TestBase() {
-		String sauceLabsUsername = TestProperties.instance().getProperty("SAUCELABS_USERNAME", null);
-		String sauceLabsAccessKey = TestProperties.instance().getProperty("SAUCELABS_ACCESSKEY", null);
-		sauceLabsHubUrl = TestProperties.instance().getProperty("saucelabs.hub.url", "ondemand.saucelabs.com:80");
+		TestProperties testProperties = TestProperties.instance();
+		String sauceLabsUsername = testProperties.getProperty("SAUCELABS_USERNAME", null);
+		String sauceLabsAccessKey = testProperties.getProperty("SAUCELABS_ACCESSKEY", null);
+		sauceLabsHubUrl = testProperties.getProperty("saucelabs.hub.url", "ondemand.saucelabs.com:80");
 
 		if (!StringUtils.isBlank(sauceLabsUsername) && !StringUtils.isBlank(sauceLabsAccessKey)) {
 			sauceLabsAuthentication = new SauceOnDemandAuthentication(sauceLabsUsername, sauceLabsAccessKey);
@@ -149,13 +118,14 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			fail("Test killed due to server failure");
 		}
 
+		launchBrowser();
+	}
+
+	public void launchBrowser()  throws Exception {
 		String testMethod = getClass().getSimpleName() + "." + testName.getMethodName();
+		final TestProperties properties = TestProperties.instance();
 		if (isRunningOnSauceLabs()) {
 			DesiredCapabilities capabilities = new DesiredCapabilities();
-
-			capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
-			capabilities.setCapability(CapabilityType.VERSION, browserVersion);
-			capabilities.setCapability(CapabilityType.PLATFORM, platform);
 
 			capabilities.setCapability("name", testMethod);
 
@@ -176,6 +146,10 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 				capabilities.setCapability("tags", branch);
 			}
 
+			if(TestProperties.DEFAULT_WEBDRIVER.equals(properties.getBrowser())) {
+				capabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
+			}
+
 			driver = new RemoteWebDriver(new URL("http://" + sauceLabsAuthentication.getUsername() + ":"
 			        + sauceLabsAuthentication.getAccessKey() + "@" + sauceLabsHubUrl +"/wd/hub"), capabilities);
 
@@ -183,7 +157,6 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 			System.out.println("Running " + testMethod + " at https://saucelabs.com/tests/" + this.sessionId);
 		} else {
 			System.out.println("Running locally...");
-			final TestProperties properties = TestProperties.instance();
 			final TestProperties.WebDriverType webDriverType = properties.getWebDriver();
 			switch (webDriverType) {
 				case chrome:
@@ -203,7 +176,8 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		driver.manage().timeouts().pageLoadTimeout(MAX_PAGE_LOAD_IN_SECONDS, TimeUnit.SECONDS);
 
 		long start = System.currentTimeMillis();
-		while(true) {
+		boolean autoLoginAtStart = properties.automaticallyLoginAtStartup();
+		while(autoLoginAtStart) {
 			try {
 				page = login();
 				//wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
@@ -277,15 +251,20 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	WebDriver setupFirefoxDriver() {
-		DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-		desiredCapabilities.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.IGNORE);
-		driver = new FirefoxDriver(desiredCapabilities);
+		if(StringUtils.isBlank(System.getProperty("webdriver.gecko.driver"))) {
+			System.setProperty("webdriver.gecko.driver", Thread.currentThread().getContextClassLoader().getResource(TestProperties.instance().getFirefoxDriverLocation()).getPath());
+		}
+		FirefoxOptions firefoxOptions = new FirefoxOptions();
+		if("true".equals(TestProperties.instance().getHeadless())) {
+			firefoxOptions.addArguments("--headless");
+		}
+		driver = new FirefoxDriver(firefoxOptions);
 		return driver;
 	}
 
 	WebDriver setupChromeDriver() {
 		URL chromedriverExecutable = null;
-		ClassLoader classLoader = TestBase.class.getClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		String chromedriverExecutableFilename = null;
 		if (SystemUtils.IS_OS_MAC_OSX) {
@@ -337,7 +316,11 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 		}
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, chromedriverFilesDir + "/chromedriver-"
 		        + getClass().getSimpleName() + ".log");
-		driver = new ChromeDriver();
+		ChromeOptions chromeOptions = new ChromeOptions();
+		if("true".equals(TestProperties.instance().getHeadless())) {
+			chromeOptions.addArguments("--headless");
+		}
+		driver = new ChromeDriver(chromeOptions);
 		return driver;
 	}
 
@@ -351,7 +334,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 	}
 
 	public void takeScreenshot(String filename) {
-		if (!isRunningOnSauceLabs()) {
+		if (!isRunningOnSauceLabs() && driver != null) {
 			File tempFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 			try {
 				FileUtils.copyFile(tempFile, new File("target/screenshots/" + filename + ".png"));

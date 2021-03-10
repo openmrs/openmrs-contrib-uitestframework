@@ -42,6 +42,16 @@ public class TestProperties {
 
 	public static final String DEFAULT_WEBAPP_URL = "http://localhost:8080/openmrs";
 
+	public static final String AUTO_LOGIN_AT_STARTUP_PROPERTY = "login.auto";
+
+	public static final String LOGIN_LOCATION_PROPERTY = "login.location";
+
+	public static final String DEFAULT_LOGIN_LOCATION = "Outpatient Clinic";
+
+	public static final String HEADLESS_PROPERTY = "headless";
+
+	public static final String DEFAULT_HEADLESS = "false";
+
 	private static TestProperties SINGLETON;
 
 	private Properties properties;
@@ -80,13 +90,28 @@ public class TestProperties {
 		return getProperty(LOGIN_PASSWORD_PROPERTY, DEFAULT_PASSWORD);
 	}
 
+	public String getLocation() {
+		return getProperty(LOGIN_LOCATION_PROPERTY, DEFAULT_LOGIN_LOCATION);
+	}
+
+	public String getHeadless() {
+		return getProperty(HEADLESS_PROPERTY, DEFAULT_HEADLESS);
+	}
+	public boolean automaticallyLoginAtStartup() {
+		return Boolean.parseBoolean(getProperty(AUTO_LOGIN_AT_STARTUP_PROPERTY, "true"));
+	}
+
+	public String getBrowser() {
+		return getProperty(WEBDRIVER_PROPERTY, DEFAULT_WEBDRIVER);
+	}
+
 	public enum WebDriverType {
 		chrome, firefox
 	}; // only these two for now
 
 	public WebDriverType getWebDriver() {
 		try {
-			return WebDriverType.valueOf(getProperty(WEBDRIVER_PROPERTY, DEFAULT_WEBDRIVER));
+			return WebDriverType.valueOf(getBrowser());
 		}
 		catch (IllegalArgumentException e) {
 			return WebDriverType.firefox;
@@ -105,5 +130,9 @@ public class TestProperties {
 			value = defaultValue;
 		}
 		return value;
+	}
+
+	public String getFirefoxDriverLocation() {
+		return getProperty("webdriver.gecko.driver", null);
 	}
 }
