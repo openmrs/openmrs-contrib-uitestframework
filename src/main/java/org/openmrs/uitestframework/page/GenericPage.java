@@ -7,13 +7,13 @@ import org.openqa.selenium.WebDriver;
  */
 public class GenericPage extends Page {
 
-	public GenericPage(WebDriver driver) {
-	    super(driver);
+    public GenericPage(WebDriver driver) {
+        super(driver);
     }
 
-	@Override
+    @Override
     public String getPageUrl() {
-	    return null;
+        return null;
     }
 
 }
