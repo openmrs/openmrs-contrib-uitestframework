@@ -16,6 +16,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A superclass for "real" pages. Has lots of handy methods for accessing elements, clicking,
@@ -153,6 +154,11 @@ public abstract class Page {
         waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
 
         return driver.findElement(by);
+    }
+
+    public List<WebElement> getElementsIfExisting(By by) {
+        driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+        return driver.findElements(by);
     }
 
     public WebElement findElementById(String id) {
