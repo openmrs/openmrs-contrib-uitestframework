@@ -2,6 +2,7 @@ package org.openmrs.uitestframework.page;
 
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.openmrs.uitestframework.page.exception.PageRejectedException;
 import org.openmrs.uitestframework.test.TestBase;
 import org.openqa.selenium.*;
@@ -159,6 +160,16 @@ public abstract class Page {
     public List<WebElement> getElementsIfExisting(By by) {
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
         return driver.findElements(by);
+    }
+
+    public void waitForPageToLoad() {
+        ExpectedCondition<Boolean> expectation = driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").toString().equals("complete");
+        try {
+            Thread.sleep(1000);
+            waiter.until(expectation);
+        } catch (Throwable error) {
+            Assert.fail("Timeout waiting for Page.");
+        }
     }
 
     public WebElement findElementById(String id) {
