@@ -370,4 +370,11 @@ public abstract class Page {
         return validationErrors;
     }
 
+    public String queryJsForAttribute(String cssHandle, String attribute) {
+        return (String) ((JavascriptExecutor) driver).executeScript(String.format("return document.querySelector('%s').%s", cssHandle, attribute));
+    }
+
+    public void setAttributeWithJs(String cssHandle, String attribute, String value) {
+        ((JavascriptExecutor) driver).executeScript(String.format("document.querySelector('%s').%s = '%s'", cssHandle, attribute, value));
+    }
 }

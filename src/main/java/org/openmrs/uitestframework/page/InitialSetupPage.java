@@ -1,19 +1,23 @@
 package org.openmrs.uitestframework.page;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 public class InitialSetupPage  extends Page {
     private By rememberCheck = By.name("remember");
     private By continueButton = By.name("continue");
-    private By passwordInput = By.cssSelector("input[type='password']");
+    private By passwordInput = By.cssSelector("input[type=password]");
     private By remoteUrlInput = By.name("remoteUrl");
     private By usernameInput = By.name("username");
     private By errorMessage = By.className("openmrs_error");
+    private String databaseConnection = "input[name=database_connection]";
     protected TestProperties testProperties = TestProperties.instance();
 
     public InitialSetupPage(WebDriver driver) {
@@ -52,16 +56,25 @@ public class InitialSetupPage  extends Page {
         pressContinue();
     }
 
+    private void setDatabaseConnection() {
+        String dbHost = testProperties.getDbHost();
+        if(StringUtils.isNotBlank(dbHost)) {
+            setAttributeWithJs(databaseConnection, "value", queryJsForAttribute(databaseConnection, "value").replace("localhost", dbHost));
+        }
+    }
+
     /**
      * Next installation steps after step 2 in right order
      */
     public void install(Type type) {
         // enter password
         if(type.equals(Type.SIMPLE)) {
+            setDatabaseConnection();
             setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
             pressContinue();// review
             pressContinue();// review
         } else if(type.equals(Type.ADVANCED)) {
+            setDatabaseConnection();
             setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
             pressContinue();
             //step 2 of 5
@@ -117,7 +130,7 @@ public class InitialSetupPage  extends Page {
     }
 
     public void waitForSetupToComplete() {
-        waiter.until(ExpectedConditions.or(ExpectedConditions.urlContains("index.htm"), ExpectedConditions.urlContains("home.page")));
+        new WebDriverWait(driver, Duration.ofSeconds(720L)).until(ExpectedConditions.or(ExpectedConditions.urlContains("index.htm"), ExpectedConditions.urlContains("home.page")));
     }
 
     public String getErrorMessage() {

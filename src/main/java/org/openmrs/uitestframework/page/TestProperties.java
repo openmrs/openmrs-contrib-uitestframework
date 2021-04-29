@@ -50,6 +50,8 @@ public class TestProperties {
 
     public static final String HEADLESS_PROPERTY = "headless";
 
+    public static final String DB_HOST = "db.host";
+
     public static final String DEFAULT_HEADLESS = "false";
 
     private static TestProperties SINGLETON;
@@ -95,6 +97,10 @@ public class TestProperties {
 
     public String getHeadless() {
         return getProperty(HEADLESS_PROPERTY, DEFAULT_HEADLESS);
+    }
+
+    public String getDbHost() {
+        return getProperty(DB_HOST, null);
     }
 
     public boolean automaticallyLoginAtStartup() {
