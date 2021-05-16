@@ -152,7 +152,7 @@ public abstract class Page {
     }
 
     public WebElement findElement(By by) {
-        waiter.until(ExpectedConditions.visibilityOfElementLocated(by));
+        waiter.until(ExpectedConditions.presenceOfElementLocated(by));
 
         return driver.findElement(by);
     }
