@@ -186,7 +186,7 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
 
         long start = System.currentTimeMillis();
         boolean autoLoginAtStart = properties.automaticallyLoginAtStartup();
-        while (autoLoginAtStart) {
+        while (autoLoginAtStart & !driver.getCurrentUrl().endsWith("index.htm")) {
             try {
                 page = login();
                 //wait for loading a page for MAX_PAGE_LOAD_IN_SECONDS + MAX_WAIT_IN_SECONDS
