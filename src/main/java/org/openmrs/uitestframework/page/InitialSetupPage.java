@@ -56,10 +56,13 @@ public class InitialSetupPage  extends Page {
         pressContinue();
     }
 
-    private void setDatabaseConnection() {
+    private void setDatabaseConnection(Type type) {
         String dbHost = testProperties.getDbHost();
         if(StringUtils.isNotBlank(dbHost)) {
             setAttributeWithJs(databaseConnection, "value", queryJsForAttribute(databaseConnection, "value").replace("localhost", dbHost));
+        }
+        if(Type.POSTGRES.equals(type)) {
+            setAttributeWithJs(databaseConnection, "value", queryJsForAttribute(databaseConnection, "value").replace("mysql", "postgresql").replace("3306", "5432"));
         }
     }
 
@@ -69,30 +72,12 @@ public class InitialSetupPage  extends Page {
     public void install(Type type) {
         // enter password
         if(type.equals(Type.SIMPLE)) {
-            setDatabaseConnection();
+            setDatabaseConnection(type);
             setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
             pressContinue();// review
             pressContinue();// review
-        } else if(type.equals(Type.ADVANCED)) {
-            setDatabaseConnection();
-            setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
-            pressContinue();
-            //step 2 of 5
-            driver.findElements(passwordInput).get(1).sendKeys(testProperties.getPassword());// last password field
-            pressContinue();
-
-            // step 3 of 5
-            pressContinue();
-
-            // step 4 of 5
-            driver.findElements(passwordInput).get(0).sendKeys(testProperties.getPassword());// password
-            driver.findElements(passwordInput).get(1).sendKeys(testProperties.getPassword());// confirm password
-            pressContinue();
-
-            // step 5 of 5
-            pressContinue();
-
-            pressContinue();// review
+        } else if(type.equals(Type.ADVANCED) || type.equals(Type.POSTGRES)) {
+            advancedInstall(type);
         } else if(type.equals(Type.TESTING)) {
             setTextToFieldNoEnter(remoteUrlInput, "http://demo.openmrs.org/openmrs");
             enterUsernameAndPassword();
@@ -112,6 +97,28 @@ public class InitialSetupPage  extends Page {
         }
     }
 
+    private void advancedInstall(Type type) {
+        setDatabaseConnection(type);
+        setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
+        pressContinue();
+        //step 2 of 5
+        driver.findElements(passwordInput).get(1).sendKeys(testProperties.getPassword());// last password field
+        pressContinue();
+
+        // step 3 of 5
+        pressContinue();
+
+        // step 4 of 5
+        driver.findElements(passwordInput).get(0).sendKeys(testProperties.getPassword());// password
+        driver.findElements(passwordInput).get(1).sendKeys(testProperties.getPassword());// confirm password
+        pressContinue();
+
+        // step 5 of 5
+        pressContinue();
+
+        pressContinue();// review
+    }
+
     public void enterUsernameAndPassword() {
         setTextToFieldNoEnter(usernameInput, testProperties.getUsername());
         setTextToFieldNoEnter(passwordInput, testProperties.getPassword());
@@ -126,7 +133,7 @@ public class InitialSetupPage  extends Page {
     }
 
     public enum Type {
-        SIMPLE, ADVANCED, TESTING
+        SIMPLE, ADVANCED, TESTING, POSTGRES
     }
 
     public void waitForSetupToComplete() {
