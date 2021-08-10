@@ -163,7 +163,7 @@ public class TestData {
      *
      * @param uuid of the resource
      */
-    public static void permanetDelete(String uuid) {
+    public static void permanentDelete(String uuid) {
 
         if (StringUtils.isNotBlank(uuid)) {
             RestClient.delete(uuid, true);
