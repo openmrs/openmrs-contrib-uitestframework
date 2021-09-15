@@ -41,6 +41,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -415,6 +416,12 @@ public class TestBase implements SauceOnDemandSessionIdProvider {
         ei.patient = patient;
         TestData.createEncounter(ei); // sets the uuid
         return ei;
+    }
+    public static void createTestFileDocument() throws IOException{
+    	RandomAccessFile randomTestFileDocument = new RandomAccessFile("patientxxx.pdf","rw");
+    	randomTestFileDocument.writeChar('H');
+    	randomTestFileDocument.writeChars("This is a test file genersted randomly purposely for attachment during the clinival visit test");
+    	randomTestFileDocument.close();
     }
 
     public void login(UserInfo user) {
